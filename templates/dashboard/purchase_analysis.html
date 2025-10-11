@@ -1,0 +1,617 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Wallet - CryptoConsult{% endblock %}
+
+{% block content %}
+
+<style>
+/* Binance-style Wallet */
+.wallet-container {
+    max-width: 1200px;
+    margin: 80px auto 2rem;
+    padding: 0 1rem;
+}
+
+/* Header Section */
+.wallet-header {
+    margin-bottom: 2rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #2b3139;
+}
+
+.wallet-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #f0b90b;
+    margin-bottom: 0.25rem;
+}
+
+.wallet-subtitle {
+    color: #848e9c;
+    font-size: 0.95rem;
+}
+
+/* Balance Overview - Binance Style */
+.balance-overview {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 4px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.balance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.balance-card {
+    background: #2b3139;
+    border: 1px solid #3c4450;
+    border-radius: 4px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.balance-card:hover {
+    border-color: #f0b90b;
+    background: #2b3139;
+}
+
+.balance-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #eaecef;
+    margin-bottom: 0.5rem;
+}
+
+.balance-value.available {
+    color: #f0b90b;
+}
+
+.balance-value.total {
+    color: #03a66d;
+}
+
+.balance-label {
+    color: #848e9c;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Payment Methods */
+.payment-methods {
+    border-top: 1px solid #2b3139;
+    padding-top: 1.5rem;
+}
+
+.payment-methods-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin-bottom: 1rem;
+}
+
+.payment-methods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.payment-method {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #2b3139;
+    border: 1px solid #3c4450;
+    border-radius: 4px;
+}
+
+.payment-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background: #3c4450;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #eaecef;
+}
+
+.payment-details {
+    flex: 1;
+}
+
+.payment-name {
+    color: #eaecef;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.payment-status {
+    font-size: 0.75rem;
+    color: #848e9c;
+}
+
+.status-active {
+    color: #03a66d;
+}
+
+.status-inactive {
+    color: #848e9c;
+}
+
+/* Quick Actions */
+.quick-actions {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 4px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.actions-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin-bottom: 1.5rem;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.action-btn {
+    padding: 1rem 1.5rem;
+    border: 1px solid #3c4450;
+    border-radius: 4px;
+    background: #2b3139;
+    color: #eaecef;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.action-btn:hover {
+    border-color: #f0b90b;
+    background: #2b3139;
+    text-decoration: none;
+    color: #eaecef;
+}
+
+.action-btn.deposit {
+    border-color: #03a66d;
+    color: #03a66d;
+}
+
+.action-btn.deposit:hover {
+    background: #03a66d;
+    color: #000000;
+}
+
+.action-btn.withdraw {
+    border-color: #f0b90b;
+    color: #f0b90b;
+}
+
+.action-btn.withdraw:hover {
+    background: #f0b90b;
+    color: #000000;
+}
+
+.action-btn.payment-methods {
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+}
+
+.action-btn.payment-methods:hover {
+    background: #8b5cf6;
+    color: #ffffff;
+}
+
+.action-btn.history {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.action-btn.history:hover {
+    background: #3b82f6;
+    color: #ffffff;
+}
+
+/* Recent Transactions */
+.recent-transactions {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 4px;
+    padding: 2rem;
+}
+
+.transactions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.transactions-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin: 0;
+}
+
+.view-all-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: #f0b90b;
+    border: 1px solid #f0b90b;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.view-all-btn:hover {
+    background: #f0b90b;
+    color: #000000;
+    text-decoration: none;
+}
+
+/* Transaction List */
+.transaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #2b3139;
+    border: 1px solid #3c4450;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.transaction-item:hover {
+    border-color: #f0b90b;
+    background: #2b3139;
+}
+
+.transaction-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background: #3c4450;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.transaction-icon.deposit {
+    background: rgba(3, 166, 109, 0.2);
+    color: #03a66d;
+}
+
+.transaction-icon.withdraw {
+    background: rgba(207, 48, 74, 0.2);
+    color: #cf304a;
+}
+
+.transaction-details {
+    flex: 1;
+}
+
+.transaction-description {
+    color: #eaecef;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.transaction-meta {
+    color: #848e9c;
+    font-size: 0.8rem;
+}
+
+.transaction-amount {
+    text-align: right;
+}
+
+.amount-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.amount-value.deposit {
+    color: #03a66d;
+}
+
+.amount-value.withdraw {
+    color: #cf304a;
+}
+
+.transaction-status {
+    font-size: 0.75rem;
+    text-transform: capitalize;
+}
+
+.status-completed {
+    color: #03a66d;
+}
+
+.status-pending {
+    color: #f0b90b;
+}
+
+.status-failed {
+    color: #cf304a;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #848e9c;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .wallet-container {
+        margin: 70px auto 1rem;
+        padding: 0 0.5rem;
+    }
+    
+    .balance-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .payment-methods-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .transaction-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .transaction-amount {
+        text-align: left;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .balance-card {
+        padding: 1rem;
+    }
+    
+    .action-btn {
+        padding: 0.75rem 1rem;
+    }
+}
+</style>
+
+<div class="wallet-container">
+    <!-- Header Section -->
+    <div class="wallet-header">
+        <h1 class="wallet-title">Wallet</h1>
+        <p class="wallet-subtitle">Manage your funds and transactions</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div style="margin-bottom: 2rem;">
+        {% for message in messages %}
+        <div style="padding: 1rem; border-radius: 4px; margin-bottom: 0.5rem;
+            {% if message.tags == 'success' %}
+                background: rgba(3, 166, 109, 0.1); border: 1px solid rgba(3, 166, 109, 0.3); color: #03a66d;
+            {% elif message.tags == 'error' %}
+                background: rgba(207, 48, 74, 0.1); border: 1px solid rgba(207, 48, 74, 0.3); color: #cf304a;
+            {% else %}
+                background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #3b82f6;
+            {% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Balance Overview -->
+    <div class="balance-overview">
+        <h2 style="font-size: 1.5rem; font-weight: 600; color: #eaecef; margin-bottom: 1.5rem;">
+            Balance Overview
+        </h2>
+        
+        <div class="balance-grid">
+            <div class="balance-card">
+                <div class="balance-value available">${{ user_wallet.balance|default:"0.00" }}</div>
+                <div class="balance-label">Available Balance</div>
+            </div>
+            
+            <div class="balance-card">
+                <div class="balance-value total">{{ transactions|length }}</div>
+                <div class="balance-label">Total Transactions</div>
+            </div>
+        </div>
+
+        <!-- Payment Methods Status -->
+        <div class="payment-methods">
+            <h3 class="payment-methods-title">Payment Methods Status</h3>
+            <div class="payment-methods-grid">
+                <div class="payment-method">
+                    <div class="payment-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="payment-details">
+                        <div class="payment-name">M-Pesa</div>
+                        <div class="payment-status {% if user_wallet.mpesa_number %}status-active{% else %}status-inactive{% endif %}">
+                            {% if user_wallet.mpesa_number %}{{ user_wallet.mpesa_number }}{% else %}Not configured{% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="payment-method">
+                    <div class="payment-icon">
+                        <i class="fab fa-paypal"></i>
+                    </div>
+                    <div class="payment-details">
+                        <div class="payment-name">PayPal</div>
+                        <div class="payment-status {% if user_wallet.paypal_email %}status-active{% else %}status-inactive{% endif %}">
+                            {% if user_wallet.paypal_email %}{{ user_wallet.paypal_email }}{% else %}Not configured{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if not user_wallet.mpesa_number or not user_wallet.paypal_email %}
+            <div style="margin-top: 1rem; text-align: center;">
+                <a href="{% url 'payment_methods' %}" class="action-btn payment-methods" style="display: inline-flex; width: auto;">
+                    <i class="fas fa-cog"></i>
+                    Setup Payment Methods
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2 class="actions-title">Quick Actions</h2>
+        
+        <div class="actions-grid">
+            <a href="{% url 'deposit' %}" class="action-btn deposit">
+                <i class="fas fa-arrow-down"></i>
+                Deposit Funds
+            </a>
+            
+            <a href="{% url 'withdraw' %}" class="action-btn withdraw">
+                <i class="fas fa-arrow-up"></i>
+                Withdraw Funds
+            </a>
+            
+            <a href="{% url 'payment_methods' %}" class="action-btn payment-methods">
+                <i class="fas fa-credit-card"></i>
+                Payment Methods
+            </a>
+            
+            <a href="{% url 'transaction_history' %}" class="action-btn history">
+                <i class="fas fa-history"></i>
+                View History
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="recent-transactions">
+        <div class="transactions-header">
+            <h2 class="transactions-title">Recent Transactions</h2>
+            <a href="{% url 'transaction_history' %}" class="view-all-btn">
+                View All
+            </a>
+        </div>
+        
+        {% if transactions %}
+        <div class="transaction-list">
+            {% for transaction in transactions %}
+            <div class="transaction-item">
+                <div class="transaction-info">
+                    <div class="transaction-icon {{ transaction.transaction_type }}">
+                        {% if transaction.transaction_type == 'deposit' %}
+                            <i class="fas fa-arrow-down"></i>
+                        {% else %}
+                            <i class="fas fa-arrow-up"></i>
+                        {% endif %}
+                    </div>
+                    <div class="transaction-details">
+                        <div class="transaction-description">
+                            {{ transaction.description }}
+                        </div>
+                        <div class="transaction-meta">
+                            {{ transaction.created_at|date:"M j, Y g:i A" }} • {{ transaction.payment_method|title }}
+                        </div>
+                    </div>
+                </div>
+                <div class="transaction-amount">
+                    <div class="amount-value {{ transaction.transaction_type }}">
+                        {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}${{ transaction.amount }}
+                    </div>
+                    <div class="transaction-status status-{{ transaction.status }}">
+                        {{ transaction.status }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">💳</div>
+            <h3>No transactions yet</h3>
+            <p>Make your first deposit to get started!</p>
+            <div style="margin-top: 1.5rem;">
+                <a href="{% url 'deposit' %}" class="action-btn deposit" style="display: inline-flex; width: auto;">
+                    <i class="fas fa-arrow-down"></i>
+                    Make First Deposit
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Wallet page initialized');
+    
+    // Add any wallet-specific JavaScript here
+    // For example: real-time balance updates, transaction filtering, etc.
+});
+</script>
+
+{% endblock %}

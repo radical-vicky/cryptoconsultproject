@@ -1,0 +1,720 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Market Insights - CryptoConsult{% endblock %}
+
+{% block extra_head %}
+<style>
+.market-insights-page {
+    max-width: 1400px;
+    margin: 80px auto 2rem;
+    padding: 0 1rem;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #f0b90b;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: #848e9c;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.insights-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+}
+
+.filters-card {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 8px;
+    padding: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.filter-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group {
+    margin-bottom: 1.5rem;
+}
+
+.filter-label {
+    display: block;
+    color: #848e9c;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 0.75rem;
+    background: #2b3139;
+    border: 1px solid #3c4450;
+    border-radius: 4px;
+    color: #eaecef;
+    font-size: 0.9rem;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #f0b90b;
+}
+
+.apply-filters {
+    width: 100%;
+    padding: 0.75rem;
+    background: #f0b90b;
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-bottom: 0.5rem;
+}
+
+.apply-filters:hover {
+    background: #e0ac0a;
+}
+
+.clear-filters {
+    width: 100%;
+    padding: 0.75rem;
+    background: transparent;
+    color: #848e9c;
+    border: 1px solid #3c4450;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clear-filters:hover {
+    background: #2b3139;
+    color: #eaecef;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.insight-card {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.insight-card:hover {
+    border-color: #f0b90b;
+    transform: translateY(-2px);
+}
+
+.insight-card.featured {
+    border-color: #f0b90b;
+    background: linear-gradient(135deg, #1e2329 0%, #2b3139 100%);
+}
+
+.featured-badge {
+    position: absolute;
+    top: -10px;
+    right: 1rem;
+    background: #f0b90b;
+    color: #000;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.insight-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.insight-crypto {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.insight-symbol {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    background: #2b3139;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #eaecef;
+    font-size: 0.9rem;
+}
+
+.insight-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin: 0;
+}
+
+.insight-type {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.insight-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.meta-item {
+    text-align: center;
+}
+
+.meta-label {
+    color: #848e9c;
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+.meta-value {
+    color: #eaecef;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.insight-summary {
+    color: #848e9c;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+.insight-takeaways {
+    background: rgba(240, 185, 11, 0.05);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.takeaways-title {
+    color: #eaecef;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.takeaways-text {
+    color: #848e9c;
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
+.insight-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-read {
+    flex: 1;
+    padding: 0.75rem;
+    background: transparent;
+    color: #f0b90b;
+    border: 1px solid #f0b90b;
+    border-radius: 4px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-read:hover {
+    background: #f0b90b;
+    color: #000;
+    text-decoration: none;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #848e9c;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats-card {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    text-align: center;
+}
+
+.stat-item {
+    padding: 1rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #f0b90b;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: #848e9c;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.recent-insights {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.recent-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.recent-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #2b3139;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.recent-item:hover {
+    background: #3c4450;
+}
+
+.recent-symbol {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    background: #1e2329;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #eaecef;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+}
+
+.recent-content {
+    flex: 1;
+}
+
+.recent-crypto {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin-bottom: 0.25rem;
+}
+
+.recent-summary {
+    font-size: 0.7rem;
+    color: #848e9c;
+    line-height: 1.3;
+}
+
+.recent-date {
+    font-size: 0.6rem;
+    color: #848e9c;
+    margin-top: 0.25rem;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.page-info {
+    color: #848e9c;
+    font-size: 0.9rem;
+}
+
+.btn-pagination {
+    padding: 0.5rem 1rem;
+    background: #2b3139;
+    color: #eaecef;
+    border: 1px solid #3c4450;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-pagination:hover {
+    background: #3c4450;
+    color: #eaecef;
+    text-decoration: none;
+}
+
+.btn-pagination.active {
+    background: #f0b90b;
+    color: #000;
+    border-color: #f0b90b;
+}
+
+@media (max-width: 1024px) {
+    .insights-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters-card {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="market-insights-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Market Insights</h1>
+        <p class="page-subtitle">Stay updated with the latest cryptocurrency market trends, analysis, and breaking news from trusted sources</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-card">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">{{ market_insights|length }}</div>
+                <div class="stat-label">Total Insights</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">
+                    {{ market_insights|length }}
+                </div>
+                <div class="stat-label">Featured</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">
+                    {{ market_insights|length }}
+                </div>
+                <div class="stat-label">Verified</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="insights-layout">
+        <!-- Main Content -->
+        <div>
+            <!-- Insights Grid -->
+            <div class="insights-grid">
+                {% for insight in market_insights %}
+                <div class="insight-card {% if insight.is_featured %}featured{% endif %}">
+                    {% if insight.is_featured %}
+                    <div class="featured-badge">Featured</div>
+                    {% endif %}
+                    
+                    <div class="insight-header">
+                        <div class="insight-crypto">
+                            <div class="insight-symbol">
+                                {{ insight.symbol|default:"MI" }}
+                            </div>
+                            <h3 class="insight-name">{{ insight.cryptocurrency|default:"Market Update" }}</h3>
+                        </div>
+                        <div class="insight-type" style="background: {{ insight.urgency_color }}20; color: {{ insight.urgency_color }};">
+                            {{ insight.get_insight_type_display }}
+                        </div>
+                    </div>
+                    
+                    <div class="insight-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Urgency</div>
+                            <div class="meta-value" style="color: {{ insight.urgency_color }};">
+                                {{ insight.get_urgency_display }}
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Impact</div>
+                            <div class="meta-value" style="color: {{ insight.impact_color }};">
+                                {{ insight.get_impact_level_display }}
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Published</div>
+                            <div class="meta-value">{{ insight.published_at|date:"M j, Y" }}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Verified</div>
+                            <div class="meta-value">
+                                {% if insight.is_verified %}
+                                <i class="fas fa-check-circle" style="color: #22c55e;"></i> Yes
+                                {% else %}
+                                <i class="fas fa-clock" style="color: #f59e0b;"></i> Pending
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="insight-summary">
+                        {{ insight.summary|truncatewords:30 }}
+                    </p>
+                    
+                    {% if insight.key_takeaways %}
+                    <div class="insight-takeaways">
+                        <div class="takeaways-title">Key Points</div>
+                        <p class="takeaways-text">
+                            {{ insight.key_takeaways|truncatewords:20 }}
+                        </p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="insight-actions">
+                        <a href="{% url 'view_market_insight' insight.id %}" class="btn-read">
+                            Read Full Insight
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <h3>No market insights found</h3>
+                    <p>Try adjusting your filters or check back later for new insights</p>
+                    <a href="{% url 'market_insights' %}" class="btn btn-primary">
+                        Clear Filters
+                    </a>
+                </div>
+                {% endfor %}
+            </div>class
+
+            <!-- Simple Pagination -->
+            {% if market_insights %}
+            <div class="pagination">
+                <span class="page-info">
+                    Showing {{ market_insights|length }} insights
+                </span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Filters -->
+            <div class="filters-card">
+                <h3 class="filter-title">
+                    <i class="fas fa-filter"></i>
+                    Filters
+                </h3>
+                
+                <form method="get" action="{% url 'market_insights' %}">
+                    <div class="filter-group">
+                        <label class="filter-label">Insight Type</label>
+                        <select name="type" class="filter-select">
+                            <option value="">All Types</option>
+                            <option value="market_trend" {% if selected_type == 'market_trend' %}selected{% endif %}>Market Trends</option>
+                            <option value="price_analysis" {% if selected_type == 'price_analysis' %}selected{% endif %}>Price Analysis</option>
+                            <option value="regulatory" {% if selected_type == 'regulatory' %}selected{% endif %}>Regulatory Updates</option>
+                            <option value="technology" {% if selected_type == 'technology' %}selected{% endif %}>Technology Updates</option>
+                            <option value="adoption" {% if selected_type == 'adoption' %}selected{% endif %}>Adoption News</option>
+                            <option value="security" {% if selected_type == 'security' %}selected{% endif %}>Security Alerts</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Urgency Level</label>
+                        <select name="urgency" class="filter-select">
+                            <option value="">All Levels</option>
+                            <option value="low" {% if selected_urgency == 'low' %}selected{% endif %}>Low</option>
+                            <option value="medium" {% if selected_urgency == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="high" {% if selected_urgency == 'high' %}selected{% endif %}>High</option>
+                            <option value="critical" {% if selected_urgency == 'critical' %}selected{% endif %}>Critical</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Cryptocurrency</label>
+                        <input type="text" 
+                               name="crypto" 
+                               class="filter-select" 
+                               placeholder="e.g., Bitcoin, ETH"
+                               value="{{ selected_crypto }}">
+                    </div>
+                    
+                    <button type="submit" class="apply-filters">
+                        Apply Filters
+                    </button>
+                    <button type="button" class="clear-filters" onclick="window.location.href='{% url 'market_insights' %}'">
+                        Clear All
+                    </button>
+                </form>
+            </div>
+
+            <!-- Recent Insights -->
+            {% if recent_insights %}
+            <div class="recent-insights">
+                <h3 class="recent-title">
+                    <i class="fas fa-clock"></i>
+                    Recent Insights
+                </h3>
+                <div class="recent-list">
+                    {% for insight in recent_insights %}
+                    <a href="{% url 'view_market_insight' insight.id %}" class="recent-item" style="text-decoration: none;">
+                        <div class="recent-symbol">
+                            {{ insight.symbol|default:insight.cryptocurrency|slice:":2"|upper }}
+                        </div>
+                        <div class="recent-content">
+                            <div class="recent-crypto">{{ insight.cryptocurrency|default:"Market" }}</div>
+                            <div class="recent-summary">{{ insight.summary|truncatewords:8 }}</div>
+                            <div class="recent-date">{{ insight.published_at|date:"M j" }}</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Featured Insights -->
+            {% if featured_insights %}
+            <div class="recent-insights">
+                <h3 class="recent-title">
+                    <i class="fas fa-star"></i>
+                    Featured Insights
+                </h3>
+                <div class="recent-list">
+                    {% for insight in featured_insights %}
+                    <a href="{% url 'view_market_insight' insight.id %}" class="recent-item" style="text-decoration: none;">
+                        <div class="recent-symbol" style="background: #f0b90b; color: #000;">
+                            {{ insight.symbol|default:insight.cryptocurrency|slice:":2"|upper }}
+                        </div>
+                        <div class="recent-content">
+                            <div class="recent-crypto">{{ insight.cryptocurrency|default:"Market" }}</div>
+                            <div class="recent-summary">{{ insight.summary|truncatewords:8 }}</div>
+                            <div class="recent-date">
+                                {{ insight.published_at|date:"M j" }}
+                                <i class="fas fa-star" style="color: #f0b90b; margin-left: 0.25rem;"></i>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add active states to filter buttons
+    const filterSelects = document.querySelectorAll('.filter-select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.style.borderColor = '#f0b90b';
+        });
+    });
+
+    // Quick filter chips (optional enhancement)
+    const filterChips = document.querySelectorAll('.filter-chip');
+    filterChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            const filterType = this.dataset.filterType;
+            const filterValue = this.dataset.filterValue;
+            // Implement quick filter logic here
+        });
+    });
+});
+</script>
+{% endblock %}

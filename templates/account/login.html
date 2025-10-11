@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign In - Cons-App{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 400px; margin: 2rem auto;">
+    <div class="text-center mb-8">
+        <h1 style="font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem;">Sign In</h1>
+        <p style="color: #94a3b8; margin-top: 0.5rem; font-size: 1.125rem;">Access your Cons-App account</p>
+    </div>
+
+    <form method="post" action="{% url 'account_login' %}" style="display: flex; flex-direction: column; gap: 1rem;">
+        {% csrf_token %}
+        
+        <!-- Display All Form Errors -->
+        {% if form.errors %}
+        <div style="padding: 1rem; border-radius: 0.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5;">
+            <strong style="display: block; margin-bottom: 0.5rem;">Please correct the following errors:</strong>
+            <ul style="margin: 0; padding-left: 1.5rem;">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Login Field -->
+        <div>
+            <label for="id_login" style="display: block; font-size: 0.875rem; font-weight: 500; color: #e2e8f0; margin-bottom: 0.5rem;">
+                Email or Username
+            </label>
+            <input type="text" 
+                   name="login" 
+                   id="id_login" 
+                   placeholder="Enter your email or username"
+                   value="{{ form.login.value|default:'' }}"
+                   style="width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid {% if form.login.errors %}#ef4444{% else %}rgba(255, 255, 255, 0.2){% endif %}; border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;"
+                   required
+                   autocomplete="email">
+            {% if form.login.errors %}
+            <div style="color: #f87171; font-size: 0.875rem; margin-top: 0.5rem;">
+                {% for error in form.login.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Password Field -->
+        <div>
+            <label for="id_password" style="display: block; font-size: 0.875rem; font-weight: 500; color: #e2e8f0; margin-bottom: 0.5rem;">
+                Password
+            </label>
+            <input type="password" 
+                   name="password" 
+                   id="id_password" 
+                   placeholder="Enter your password"
+                   style="width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid {% if form.password.errors %}#ef4444{% else %}rgba(255, 255, 255, 0.2){% endif %}; border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;"
+                   required
+                   autocomplete="current-password">
+            {% if form.password.errors %}
+            <div style="color: #f87171; font-size: 0.875rem; margin-top: 0.5rem;">
+                {% for error in form.password.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Remember Me -->
+        <div style="display: flex; align-items: center;">
+            <input type="checkbox" 
+                   name="remember" 
+                   id="id_remember"
+                   {% if form.remember.value %}checked{% endif %}
+                   style="border-radius: 0.25rem; border: 1px solid #4b5563; background: #1f2937; color: #3b82f6; width: 1rem; height: 1rem; cursor: pointer;">
+            <label for="id_remember" style="margin-left: 0.5rem; font-size: 0.875rem; color: #e2e8f0; cursor: pointer;">
+                Remember me
+            </label>
+        </div>
+
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+
+        <button type="submit" style="padding: 0.75rem 1rem; background: #3b82f6; color: white; border: 2px solid #3b82f6; border-radius: 0.5rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; width: 100%;">
+            Sign In
+        </button>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center; display: flex; flex-direction: column; gap: 0.75rem;">
+        <a href="{% url 'account_reset_password' %}" style="color: #3b82f6; text-decoration: none; transition: color 0.3s ease; display: block;">
+            Forgot your password?
+        </a>
+        <p style="color: #94a3b8;">
+            Don't have an account? 
+            <a href="{% url 'account_signup' %}" style="color: #3b82f6; text-decoration: none; font-weight: 500; transition: color 0.3s ease;">
+                Sign up here
+            </a>
+        </p>
+    </div>
+
+    <!-- Debug Section (Remove in production) -->
+    {% if form.errors %}
+    <div style="margin-top: 2rem; padding: 1rem; background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; border-radius: 0.5rem;">
+        <h4 style="color: #3b82f6; margin-bottom: 0.5rem;">Debug Info:</h4>
+        <p style="color: #94a3b8; font-size: 0.875rem; margin: 0.25rem 0;">
+            Form has errors: {{ form.errors }}
+        </p>
+        <p style="color: #94a3b8; font-size: 0.875rem; margin: 0.25rem 0;">
+            Non-field errors: {{ form.non_field_errors }}
+        </p>
+        <p style="color: #94a3b8; font-size: 0.875rem; margin: 0.25rem 0;">
+            Login errors: {{ form.login.errors }}
+        </p>
+        <p style="color: #94a3b8; font-size: 0.875rem; margin: 0.25rem 0;">
+            Password errors: {{ form.password.errors }}
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+/* Additional styles for form elements */
+input:focus {
+    outline: none;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+input[type="checkbox"]:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #1f2937;
+    border: 1px solid #4b5563;
+    border-radius: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    position: relative;
+    cursor: pointer;
+}
+
+input[type="checkbox"]:checked::before {
+    content: "✓";
+    position: absolute;
+    color: white;
+    font-size: 0.75rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+button:hover {
+    background: transparent !important;
+    color: #3b82f6 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+}
+
+a:hover {
+    color: rgba(59, 130, 246, 0.8);
+}
+
+/* Error field styling */
+input:invalid {
+    border-color: #ef4444 !important;
+}
+
+/* Animation for error messages */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+div[style*="color: #f87171"] {
+    animation: slideDown 0.3s ease-out;
+}
+</style>
+
+<script>
+// Add some client-side validation and enhancements
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.querySelector('form');
+    const loginInput = document.getElementById('id_login');
+    const passwordInput = document.getElementById('id_password');
+    
+    // Add real-time validation feedback
+    function validateField(field) {
+        if (field.value.trim() === '') {
+            field.style.borderColor = '#ef4444';
+        } else {
+            field.style.borderColor = '#3b82f6';
+        }
+    }
+    
+    // Validate on input
+    if (loginInput) {
+        loginInput.addEventListener('input', function() {
+            validateField(this);
+        });
+    }
+    
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            validateField(this);
+        });
+    }
+    
+    // Validate on form submission
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            if (!loginInput.value.trim()) {
+                loginInput.style.borderColor = '#ef4444';
+                isValid = false;
+            }
+            
+            if (!passwordInput.value.trim()) {
+                passwordInput.style.borderColor = '#ef4444';
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                // Show a message if both fields are empty
+                if (!loginInput.value.trim() && !passwordInput.value.trim()) {
+                    alert('Please enter your email/username and password.');
+                }
+            }
+        });
+    }
+    
+    // Clear error styling when user starts typing
+    const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                this.style.borderColor = '#3b82f6';
+            }
+        });
+    });
+    
+    // Add loading state to submit button
+    const submitButton = document.querySelector('button[type="submit"]');
+    if (submitButton) {
+        loginForm.addEventListener('submit', function() {
+            submitButton.innerHTML = 'Signing In...';
+            submitButton.disabled = true;
+            submitButton.style.opacity = '0.7';
+        });
+    }
+});
+</script>
+{% endblock %}

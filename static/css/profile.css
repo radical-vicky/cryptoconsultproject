@@ -1,0 +1,1048 @@
+:root {
+    --binance-yellow: #f0b90b;
+    --binance-dark: #0c0e14;
+    --binance-card: #161a25;
+    --binance-border: #2b3139;
+    --binance-hover: #1e2329;
+    --text-primary: #eaecef;
+    --text-secondary: #848e9c;
+    --success-color: #03a66d;
+    --danger-color: #cf304a;
+    --primary-color: #3b82f6;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--binance-dark);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.profile-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    background: var(--binance-card);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid var(--binance-border);
+}
+
+/* Header with Binance Style */
+.profile-header {
+    background: linear-gradient(135deg, var(--binance-dark), #131722);
+    padding: 2.5rem 2rem;
+    border-bottom: 1px solid var(--binance-border);
+    position: relative;
+}
+
+.profile-header-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--binance-yellow);
+    background: var(--binance-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: var(--binance-yellow);
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.profile-email {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--binance-yellow);
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* Profile Content Layout */
+.profile-content {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 0;
+    min-height: 600px;
+}
+
+/* Sidebar Navigation - Binance Style */
+.profile-sidebar {
+    background: var(--binance-card);
+    padding: 2rem 0;
+    border-right: 1px solid var(--binance-border);
+}
+
+.nav-tabs {
+    list-style: none;
+}
+
+.nav-tab {
+    margin-bottom: 0.25rem;
+}
+
+.nav-tab a {
+    display: flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    font-weight: 500;
+    border-left: 3px solid transparent;
+    position: relative;
+}
+
+.nav-tab a:hover {
+    background: var(--binance-hover);
+    color: var(--text-primary);
+}
+
+.nav-tab a.active {
+    background: var(--binance-hover);
+    color: var(--binance-yellow);
+    border-left-color: var(--binance-yellow);
+}
+
+.nav-tab a.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--binance-yellow);
+}
+
+.nav-tab i {
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* Main Content */
+.profile-main {
+    padding: 2rem;
+    background: var(--binance-dark);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeInUp 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--binance-border);
+}
+
+/* Forms - Binance Style */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--binance-card);
+    border: 1px solid var(--binance-border);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--binance-yellow);
+    box-shadow: 0 0 0 2px rgba(240, 185, 11, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--text-secondary);
+}
+
+.form-control:disabled {
+    background: var(--binance-hover);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Textarea specific styles */
+.form-control[rows] {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Date input specific styles */
+.form-control[type="date"] {
+    color-scheme: dark;
+}
+
+/* File Upload */
+.file-upload {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.file-upload-input {
+    position: absolute;
+    left: -9999px;
+}
+
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    background: var(--binance-card);
+    border: 2px dashed var(--binance-border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    color: var(--text-secondary);
+    gap: 0.75rem;
+}
+
+.file-upload-label:hover {
+    border-color: var(--binance-yellow);
+    background: var(--binance-hover);
+    color: var(--binance-yellow);
+}
+
+.file-preview {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.file-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 4px;
+    border: 1px solid var(--binance-border);
+}
+
+/* Security Badges */
+.security-badges {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.security-badge {
+    background: var(--binance-card);
+    border: 1px solid var(--binance-border);
+    border-radius: 4px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.security-badge:hover {
+    border-color: var(--binance-yellow);
+    transform: translateY(-2px);
+}
+
+.security-badge.verified {
+    border-color: var(--success-color);
+}
+
+.security-badge.pending {
+    border-color: var(--binance-yellow);
+}
+
+.security-badge.unverified {
+    border-color: var(--danger-color);
+}
+
+.badge-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.badge-icon.verified {
+    color: var(--success-color);
+}
+
+.badge-icon.pending {
+    color: var(--binance-yellow);
+}
+
+.badge-icon.unverified {
+    color: var(--danger-color);
+}
+
+.badge-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.badge-status {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-status.verified {
+    color: var(--success-color);
+}
+
+.badge-status.pending {
+    color: var(--binance-yellow);
+}
+
+.badge-status.unverified {
+    color: var(--danger-color);
+}
+
+/* Buttons - Binance Style */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: var(--binance-yellow);
+    color: #000000;
+    border-color: var(--binance-yellow);
+}
+
+.btn-primary:hover {
+    background: #e0ac0a;
+    border-color: #e0ac0a;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border-color: var(--binance-border);
+}
+
+.btn-secondary:hover {
+    background: var(--binance-hover);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--binance-yellow);
+    border-color: var(--binance-yellow);
+}
+
+.btn-outline:hover {
+    background: var(--binance-yellow);
+    color: #000000;
+}
+
+/* Account Level */
+.account-level {
+    background: var(--binance-card);
+    border: 1px solid var(--binance-border);
+    border-radius: 4px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.level-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.level-title {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.level-badge {
+    background: var(--binance-yellow);
+    color: #000000;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.level-progress {
+    background: var(--binance-border);
+    height: 6px;
+    border-radius: 3px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+.level-progress-bar {
+    background: var(--binance-yellow);
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.level-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    font-size: 0.85rem;
+}
+
+.level-stat {
+    text-align: center;
+}
+
+.level-stat-value {
+    font-weight: 600;
+    color: var(--binance-yellow);
+    display: block;
+}
+
+.level-stat-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+/* API Management */
+.api-section {
+    background: var(--binance-card);
+    border: 1px solid var(--binance-border);
+    border-radius: 4px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.api-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.api-title {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.api-key {
+    background: var(--binance-dark);
+    border: 1px solid var(--binance-border);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.api-key-text {
+    flex: 1;
+    color: var(--text-secondary);
+}
+
+.api-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Alerts */
+.alert {
+    padding: 1rem 1.25rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid;
+    background: var(--binance-card);
+    border: 1px solid var(--binance-border);
+}
+
+.alert-success {
+    border-left-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.alert-error {
+    border-left-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+/* Error states */
+.text-danger {
+    color: var(--danger-color) !important;
+}
+
+.form-control.error {
+    border-color: var(--danger-color);
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid var(--binance-yellow);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Custom scrollbar */
+.profile-main::-webkit-scrollbar {
+    width: 6px;
+}
+
+.profile-main::-webkit-scrollbar-track {
+    background: var(--binance-border);
+    border-radius: 3px;
+}
+
+.profile-main::-webkit-scrollbar-thumb {
+    background: var(--binance-yellow);
+    border-radius: 3px;
+}
+
+.profile-main::-webkit-scrollbar-thumb:hover {
+    background: #e0ac0a;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .profile-content {
+        grid-template-columns: 250px 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        margin: 1rem;
+        border-radius: 4px;
+    }
+    
+    .profile-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--binance-border);
+        padding: 1.5rem 0;
+    }
+    
+    .profile-main {
+        padding: 1.5rem;
+    }
+    
+    .profile-header {
+        padding: 2rem 1.5rem;
+    }
+    
+    .profile-header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .profile-stats {
+        justify-content: center;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .security-badges {
+        grid-template-columns: 1fr;
+    }
+    
+    .nav-tab a {
+        padding: 0.875rem 1.5rem;
+    }
+    
+    .account-level {
+        padding: 1.25rem;
+    }
+    
+    .api-section {
+        padding: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-container {
+        margin: 0.5rem;
+        border-radius: 4px;
+    }
+    
+    .profile-header {
+        padding: 1.5rem 1rem;
+    }
+    
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+    
+    .profile-name {
+        font-size: 1.5rem;
+    }
+    
+    .profile-main {
+        padding: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+    }
+    
+    .profile-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.85rem;
+    }
+    
+    .security-badge {
+        padding: 1.25rem;
+    }
+    
+    .level-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Additional utility classes for form error handling */
+.form-error {
+    color: var(--danger-color);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.form-success {
+    color: var(--success-color);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Focus states for accessibility */
+.btn:focus,
+.form-control:focus,
+.file-upload-input:focus + .file-upload-label {
+    outline: 2px solid var(--binance-yellow);
+    outline-offset: 2px;
+}
+
+/* Animation for form submissions */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.alert {
+    animation: slideIn 0.3s ease;
+}
+
+/* Improved file upload preview */
+.file-preview {
+    margin-top: 1rem;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.file-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 4px;
+    border: 1px solid var(--binance-border);
+    transition: var(--transition);
+}
+
+.file-preview img:hover {
+    transform: scale(1.05);
+    border-color: var(--binance-yellow);
+}
+
+/* Enhanced button states */
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.btn-primary.loading::after {
+    border-top-color: #000000;
+}
+
+/* Password Change Specific Styles */
+.password-change-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    background: var(--binance-card);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid var(--binance-border);
+}
+
+.security-section {
+    padding: 0;
+}
+
+.security-card {
+    background: var(--binance-dark);
+    border: 1px solid var(--binance-border);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.security-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--binance-border);
+}
+
+.security-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--binance-yellow), #e0ac0a);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #000000;
+}
+
+.security-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+}
+
+.security-info p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-container .form-control {
+    padding-right: 3rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: var(--transition);
+}
+
+.password-toggle:hover {
+    color: var(--binance-yellow);
+}
+
+.password-strength {
+    background: var(--binance-card);
+    border: 1px solid var(--binance-border);
+    border-radius: 4px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.strength-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.strength-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.strength-meter {
+    background: var(--binance-border);
+    height: 6px;
+    border-radius: 3px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    width: 0%;
+}
+
+.strength-requirements {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.strength-requirements p {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.strength-requirements ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.strength-requirements li {
+    margin: 0.25rem 0;
+    transition: color 0.3s ease;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--binance-border);
+}
+
+.security-tips {
+    background: var(--binance-dark);
+    border: 1px solid var(--binance-border);
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+.security-tips h3 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.tip-card {
+    background: var(--binance-card);
+    border: 1px solid var(--binance-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: var(--transition);
+}
+
+.tip-card:hover {
+    border-color: var(--binance-yellow);
+    transform: translateY(-2px);
+}
+
+.tip-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(240, 185, 11, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--binance-yellow);
+    font-size: 1.25rem;
+}
+
+.tip-content h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.tip-content p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .security-card,
+    .security-tips {
+        padding: 1.5rem;
+    }
+
+    .security-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+}

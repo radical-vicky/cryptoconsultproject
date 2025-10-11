@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign Up - Cons-App{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 400px; margin: 2rem auto;">
+    <div class="text-center mb-8">
+        <h1 style="font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem;">Create Account</h1>
+        <p style="color: #94a3b8; margin-top: 0.5rem; font-size: 1.125rem;">Join Cons-App today</p>
+    </div>
+
+    <form method="post" action="{% url 'account_signup' %}" style="display: flex; flex-direction: column; gap: 1rem;">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+        <div style="padding: 0.75rem; border-radius: 0.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5;">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+
+        <!-- Username Field -->
+        <div>
+            <label for="id_username" style="display: block; font-size: 0.875rem; font-weight: 500; color: #e2e8f0; margin-bottom: 0.5rem;">
+                Username
+            </label>
+            <input type="text" 
+                   name="username" 
+                   id="id_username" 
+                   placeholder="Choose a username"
+                   style="width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;"
+                   required
+                   autocomplete="username">
+            {% if form.username.errors %}
+            <div style="color: #f87171; font-size: 0.875rem; margin-top: 0.25rem;">{{ form.username.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Email Field -->
+        <div>
+            <label for="id_email" style="display: block; font-size: 0.875rem; font-weight: 500; color: #e2e8f0; margin-bottom: 0.5rem;">
+                Email Address
+            </label>
+            <input type="email" 
+                   name="email" 
+                   id="id_email" 
+                   placeholder="Enter your email"
+                   style="width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;"
+                   required
+                   autocomplete="email">
+            {% if form.email.errors %}
+            <div style="color: #f87171; font-size: 0.875rem; margin-top: 0.25rem;">{{ form.email.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Password Fields -->
+        <div>
+            <label for="id_password1" style="display: block; font-size: 0.875rem; font-weight: 500; color: #e2e8f0; margin-bottom: 0.5rem;">
+                Password
+            </label>
+            <input type="password" 
+                   name="password1" 
+                   id="id_password1" 
+                   placeholder="Create a password"
+                   style="width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;"
+                   required
+                   autocomplete="new-password">
+            {% if form.password1.errors %}
+            <div style="color: #f87171; font-size: 0.875rem; margin-top: 0.25rem;">{{ form.password1.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="id_password2" style="display: block; font-size: 0.875rem; font-weight: 500; color: #e2e8f0; margin-bottom: 0.5rem;">
+                Confirm Password
+            </label>
+            <input type="password" 
+                   name="password2" 
+                   id="id_password2" 
+                   placeholder="Confirm your password"
+                   style="width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;"
+                   required
+                   autocomplete="new-password">
+            {% if form.password2.errors %}
+            <div style="color: #f87171; font-size: 0.875rem; margin-top: 0.25rem;">{{ form.password2.errors }}</div>
+            {% endif %}
+        </div>
+
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+
+        <button type="submit" style="padding: 0.75rem 1rem; background: #3b82f6; color: white; border: 2px solid #3b82f6; border-radius: 0.5rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; width: 100%;">
+            Create Account
+        </button>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center;">
+        <p style="color: #94a3b8;">
+            Already have an account? 
+            <a href="{% url 'account_login' %}" style="color: #3b82f6; text-decoration: none; font-weight: 500; transition: color 0.3s ease;">
+                Sign in here
+            </a>
+        </p>
+    </div>
+</div>
+
+<style>
+/* Additional styles for form elements */
+input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+button:hover {
+    background: transparent;
+    color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+}
+
+a:hover {
+    color: rgba(59, 130, 246, 0.8);
+}
+</style>
+{% endblock %}

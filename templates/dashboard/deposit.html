@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Deposit Funds - Cons-App{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 2rem auto;">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+        <h1 style="font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #ffffff;">
+            Deposit Funds
+        </h1>
+        <p style="color: #94a3b8; font-size: 1.125rem;">
+            Add money to your wallet
+        </p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div style="margin-bottom: 2rem;">
+        {% for message in messages %}
+        <div style="padding: 1rem; border-radius: 0.5rem; 
+            {% if message.tags == 'success' %}
+                background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.5); color: #86efac;
+            {% elif message.tags == 'error' %}
+                background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5;
+            {% else %}
+                background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.5); color: #93c5fd;
+            {% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Current Balance -->
+    <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 2rem; text-align: center;">
+        <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
+            Current Balance
+        </div>
+        <div style="font-size: 2rem; font-weight: 700; color: #3b82f6;">
+            ${{ user_wallet.balance|default:"0.00" }}
+        </div>
+    </div>
+
+    <!-- Deposit Form -->
+    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.75rem; padding: 2rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 600; color: #ffffff; margin-bottom: 1.5rem;">
+            Deposit Details
+        </h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Display Form Errors -->
+            {% if form.errors %}
+            <div style="padding: 1rem; border-radius: 0.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; margin-bottom: 1.5rem;">
+                <strong style="display: block; margin-bottom: 0.5rem;">Please correct the following errors:</strong>
+                <ul style="margin: 0; padding-left: 1.5rem;">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Amount Field -->
+            <div style="margin-bottom: 1.5rem;">
+                <label for="id_amount" style="display: block; font-size: 0.875rem; font-weight: 500; color: #94a3b8; margin-bottom: 0.5rem;">
+                    Amount to Deposit
+                </label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-weight: 500; z-index: 10;">$</span>
+                    <input type="number" 
+                           name="amount" 
+                           id="id_amount"
+                           min="1"
+                           step="0.01"
+                           placeholder="0.00"
+                           value="{{ form.amount.value|default:'' }}"
+                           style="width: 100%; padding: 1rem 1rem 1rem 2.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid {% if form.amount.errors %}#ef4444{% else %}rgba(255, 255, 255, 0.2){% endif %}; border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;"
+                           required>
+                </div>
+                {% if form.amount.errors %}
+                <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;">
+                    {% for error in form.amount.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.5rem;">
+                    Minimum deposit: $1.00
+                </div>
+            </div>
+
+            <!-- Payment Method Field -->
+            <div style="margin-bottom: 2rem;">
+                <label for="id_payment_method" style="display: block; font-size: 0.875rem; font-weight: 500; color: #94a3b8; margin-bottom: 0.5rem;">
+                    Payment Method
+                </label>
+                <select name="payment_method" 
+                        id="id_payment_method"
+                        style="width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid {% if form.payment_method.errors %}#ef4444{% else %}rgba(255, 255, 255, 0.2){% endif %}; border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;"
+                        required>
+                    <option value="">Select a payment method</option>
+                    <option value="mpesa" {% if form.payment_method.value == 'mpesa' %}selected{% endif %}>M-Pesa</option>
+                    <option value="paypal" {% if form.payment_method.value == 'paypal' %}selected{% endif %}>PayPal</option>
+                </select>
+                {% if form.payment_method.errors %}
+                <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;">
+                    {% for error in form.payment_method.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Payment Method Status -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; padding: 1rem; margin-bottom: 2rem;">
+                <h3 style="font-size: 1rem; font-weight: 600; color: #ffffff; margin-bottom: 1rem;">
+                    Payment Method Status
+                </h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: {% if user_wallet.mpesa_number %}#10b981{% else %}#ef4444{% endif %};">
+                            {% if user_wallet.mpesa_number %}✅{% else %}❌{% endif %}
+                        </span>
+                        <span style="color: #94a3b8;">M-Pesa: {% if user_wallet.mpesa_number %}{{ user_wallet.mpesa_number }}{% else %}Not set{% endif %}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: {% if user_wallet.paypal_email %}#10b981{% else %}#ef4444{% endif %};">
+                            {% if user_wallet.paypal_email %}✅{% else %}❌{% endif %}
+                        </span>
+                        <span style="color: #94a3b8;">PayPal: {% if user_wallet.paypal_email %}{{ user_wallet.paypal_email }}{% else %}Not set{% endif %}</span>
+                    </div>
+                </div>
+                {% if not user_wallet.mpesa_number and not user_wallet.paypal_email %}
+                <div style="margin-top: 1rem; text-align: center;">
+                    <a href="{% url 'payment_methods' %}" 
+                       style="padding: 0.5rem 1rem; background: transparent; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 0.5rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none; font-size: 0.875rem;">
+                        Setup Payment Methods First
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button type="submit" 
+                        style="padding: 1rem 1.5rem; background: #10b981; color: white; border: 2px solid #10b981; border-radius: 0.75rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <span></span>
+                    Deposit Now
+                </button>
+                
+                <a href="{% url 'wallet' %}" 
+                   style="padding: 1rem 1.5rem; background: transparent; color: #94a3b8; border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 0.75rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <span>←</span>
+                    Back to Wallet
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Deposit Information -->
+    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.75rem; padding: 1.5rem; margin-top: 2rem;">
+        <h3 style="font-size: 1.125rem; font-weight: 600; color: #ffffff; margin-bottom: 1rem;">
+            💡 Deposit Information
+        </h3>
+        <div style="color: #94a3b8; font-size: 0.875rem; line-height: 1.5;">
+            <ul style="margin: 0; padding-left: 1.5rem;">
+                <li>Deposits are processed instantly</li>
+                <li>M-Pesa deposits require STK push confirmation on your phone</li>
+                <li>PayPal deposits redirect to PayPal for payment confirmation</li>
+                <li>All deposits are secured with bank-level encryption</li>
+                <li>Contact support if you experience any issues</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+a:hover, button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+}
+
+button[type="submit"]:hover {
+    background: transparent !important;
+    color: #10b981 !important;
+}
+
+a:hover {
+    background: #3b82f6 !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    div[style*="grid-template-columns: 1fr 1fr"]:last-child {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+{% endblock %}

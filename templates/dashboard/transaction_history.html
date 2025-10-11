@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Transaction History - Cons-App{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px; margin: 2rem auto;">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+        <h1 style="font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #ffffff;">
+            Transaction History
+        </h1>
+        <p style="color: #94a3b8; font-size: 1.125rem;">
+            Complete record of all your transactions
+        </p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 0.75rem; padding: 1.5rem; text-align: center;">
+            <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
+                Total Balance
+            </div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #3b82f6;">
+                ${{ user_wallet.balance|default:"0.00" }}
+            </div>
+        </div>
+        
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 0.75rem; padding: 1.5rem; text-align: center;">
+            <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
+                Total Transactions
+            </div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">
+                {{ transactions|length }}
+            </div>
+        </div>
+        
+        <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 0.75rem; padding: 1.5rem; text-align: center;">
+            <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
+                Completed
+            </div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #8b5cf6;">
+                {{ completed_count }}
+            </div>
+        </div>
+        
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 0.75rem; padding: 1.5rem; text-align: center;">
+            <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
+                Pending
+            </div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">
+                {{ pending_count }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.75rem; padding: 2rem;">
+        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; color: #ffffff; margin: 0;">
+                All Transactions
+            </h2>
+            <a href="{% url 'wallet' %}" 
+               style="padding: 0.5rem 1rem; background: transparent; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 0.5rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none; font-size: 0.875rem;">
+                ← Back to Wallet
+            </a>
+        </div>
+        
+        {% if transactions %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <th style="padding: 1rem; text-align: left; color: #94a3b8; font-weight: 500; font-size: 0.875rem;">Date & Time</th>
+                        <th style="padding: 1rem; text-align: left; color: #94a3b8; font-weight: 500; font-size: 0.875rem;">Description</th>
+                        <th style="padding: 1rem; text-align: left; color: #94a3b8; font-weight: 500; font-size: 0.875rem;">Method</th>
+                        <th style="padding: 1rem; text-align: right; color: #94a3b8; font-weight: 500; font-size: 0.875rem;">Amount</th>
+                        <th style="padding: 1rem; text-align: center; color: #94a3b8; font-weight: 500; font-size: 0.875rem;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease;">
+                        <td style="padding: 1rem; color: #94a3b8; font-size: 0.875rem;">
+                            {{ transaction.created_at|date:"M j, Y" }}<br>
+                            <span style="font-size: 0.75rem; color: #64748b;">{{ transaction.created_at|date:"g:i A" }}</span>
+                        </td>
+                        <td style="padding: 1rem;">
+                            <div style="color: #ffffff; font-weight: 500; margin-bottom: 0.25rem;">
+                                {{ transaction.description }}
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.75rem; text-transform: capitalize;">
+                                {{ transaction.transaction_type }}
+                            </div>
+                        </td>
+                        <td style="padding: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: #94a3b8; font-size: 0.875rem; text-transform: capitalize;">
+                                    {{ transaction.payment_method }}
+                                </span>
+                            </div>
+                        </td>
+                        <td style="padding: 1rem; text-align: right;">
+                            <div style="color: {% if transaction.transaction_type == 'deposit' %}#10b981{% else %}#ef4444{% endif %}; font-weight: 700;">
+                                {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}${{ transaction.amount }}
+                            </div>
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <span style="padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500; text-transform: capitalize;
+                                background: {% if transaction.status == 'completed' %}rgba(16, 185, 129, 0.2){% elif transaction.status == 'pending' %}rgba(245, 158, 11, 0.2){% else %}rgba(239, 68, 68, 0.2){% endif %};
+                                color: {% if transaction.status == 'completed' %}#10b981{% elif transaction.status == 'pending' %}#f59e0b{% else %}#ef4444{% endif %};
+                                border: 1px solid {% if transaction.status == 'completed' %}rgba(16, 185, 129, 0.3){% elif transaction.status == 'pending' %}rgba(245, 158, 11, 0.3){% else %}rgba(239, 68, 68, 0.3){% endif %};">
+                                {{ transaction.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Empty State -->
+        {% else %}
+        <div style="text-align: center; padding: 4rem 2rem; color: #94a3b8;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📊</div>
+            <div style="font-size: 1.25rem; margin-bottom: 0.5rem;">No transactions yet</div>
+            <div>Your transaction history will appear here once you start using your wallet</div>
+            <div style="margin-top: 1.5rem;">
+                <a href="{% url 'deposit' %}" 
+                   style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none; margin-right: 1rem;">
+                    Make First Deposit
+                </a>
+                <a href="{% url 'wallet' %}" 
+                   style="padding: 0.75rem 1.5rem; background: transparent; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 0.5rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none;">
+                    Back to Wallet
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+a:hover, button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+}
+
+a:hover {
+    background: #3b82f6 !important;
+    color: white !important;
+}
+
+a[href*="deposit"]:hover {
+    background: #10b981 !important;
+}
+
+table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    div[style*="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))"] {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    
+    table {
+        display: block;
+    }
+    
+    thead {
+        display: none;
+    }
+    
+    tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    tbody td {
+        display: block;
+        text-align: right !important;
+        padding: 0.75rem 1rem !important;
+        border: none !important;
+    }
+    
+    tbody td::before {
+        content: attr(style);
+        float: left;
+        font-weight: 500;
+        color: #94a3b8;
+        font-size: 0.75rem;
+    }
+    
+    tbody td:nth-child(1)::before { content: "Date & Time"; }
+    tbody td:nth-child(2)::before { content: "Description"; }
+    tbody td:nth-child(3)::before { content: "Method"; }
+    tbody td:nth-child(4)::before { content: "Amount"; }
+    tbody td:nth-child(5)::before { content: "Status"; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,1872 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Consultations - Cons-App{% endblock %}
+
+{% block content %}
+<section class="py-8" style="background: linear-gradient(135deg, var(--binance-dark), #131722);">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-4" style="margin-top: 8rem;">My Consultations</h1>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                Manage your scheduled sessions and track your consultation history
+            </p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="dashboard-grid mb-8">
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3 class="dashboard-card-title">Scheduled Sessions</h3>
+                    <div class="crypto-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ scheduled_count }}</div>
+                <p class="text-gray-400">Upcoming consultations</p>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3 class="dashboard-card-title">Completed</h3>
+                    <div class="crypto-icon" style="background: var(--binance-green);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value" style="color: var(--binance-green);">{{ completed_count }}</div>
+                <p class="text-gray-400">Past consultations</p>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3 class="dashboard-card-title">Total Invested</h3>
+                    <div class="crypto-icon" style="background: var(--binance-blue);">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                </div>
+                <div class="stat-value" style="color: var(--binance-blue);">${{ total_invested|default:"0.00" }}</div>
+                <p class="text-gray-400">In consultation services</p>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3 class="dashboard-card-title">Next Session</h3>
+                    <div class="crypto-icon" style="background: var(--binance-yellow);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                {% if next_consultation %}
+                <div class="stat-value" style="font-size: 1.5rem; color: var(--binance-yellow);">
+                    {{ next_consultation.scheduled_date|date:"M j" }}
+                </div>
+                <p class="text-gray-400">{{ next_consultation.scheduled_date|time:"g:i A" }}</p>
+                {% else %}
+                <div class="stat-value" style="font-size: 1.5rem; color: var(--text-secondary);">None</div>
+                <p class="text-gray-400">No upcoming sessions</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <div class="dashboard-card mb-8">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="upcoming">
+                    <i class="fas fa-clock"></i>Upcoming Sessions
+                </button>
+                <button class="tab-btn" data-tab="completed">
+                    <i class="fas fa-check-circle"></i>Completed
+                </button>
+                <button class="tab-btn" data-tab="cancelled">
+                    <i class="fas fa-times-circle"></i>Cancelled
+                </button>
+            </div>
+
+            <!-- Upcoming Sessions Tab -->
+            <div id="upcoming-tab" class="tab-content active">
+                {% if upcoming_consultations %}
+                <div class="space-y-6">
+                    {% for consultation in upcoming_consultations %}
+                    <div class="consultation-session-card upcoming" data-consultation-id="{{ consultation.id }}">
+                        <div class="session-header">
+                            <div class="session-info">
+                                <h3 class="session-title">{{ consultation.title }}</h3>
+                                <div class="session-meta">
+                                    <span class="session-level level-{{ consultation.level }}">{{ consultation.get_level_display }}</span>
+                                    <span class="session-price">${{ consultation.price }}</span>
+                                    <span class="session-duration">{{ consultation.duration_minutes }} minutes</span>
+                                </div>
+                            </div>
+                            <div class="session-status status-scheduled">
+                                <i class="fas fa-clock"></i>
+                                {{ consultation.meeting_status }}
+                            </div>
+                        </div>
+
+                        <div class="session-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <strong>Date:</strong> 
+                                {{ consultation.scheduled_date|date:"F j, Y" }}
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <strong>Time:</strong> 
+                                {{ consultation.scheduled_date|time:"g:i A" }} (Your local time)
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-hourglass-half"></i>
+                                <strong>Time Until Session:</strong> 
+                                <span class="countdown" data-date="{{ consultation.scheduled_date|date:'c' }}">
+                                    Calculating...
+                                </span>
+                            </div>
+                            {% if consultation.meeting_platform %}
+                            <div class="detail-item">
+                                <i class="fas fa-video"></i>
+                                <strong>Platform:</strong> 
+                                {{ consultation.get_meeting_platform_display }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Video Consultation Section -->
+                        <div class="video-consultation-section">
+                            <h4 class="video-section-title">
+                                <i class="fas fa-video"></i> Video Consultation
+                            </h4>
+                            
+                            {% if consultation.meeting_link %}
+                            <div class="video-details">
+                                <div class="video-info">
+                                    <div class="video-platform">
+                                        <strong>Platform:</strong> {{ consultation.get_meeting_platform_display }}
+                                    </div>
+                                    {% if consultation.meeting_id %}
+                                    <div class="meeting-id">
+                                        <strong>Meeting ID:</strong> {{ consultation.meeting_id }}
+                                    </div>
+                                    {% endif %}
+                                    {% if consultation.meeting_password %}
+                                    <div class="meeting-password">
+                                        <strong>Password:</strong> {{ consultation.meeting_password }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="video-actions">
+                                    <!-- Join Meeting Button -->
+                                    <a href="{{ consultation.join_url }}" target="_blank" 
+                                       class="btn {% if consultation.can_join_meeting %}btn-success{% else %}btn-outline{% endif %} join-meeting-btn"
+                                       {% if not consultation.can_join_meeting %}disabled{% endif %}>
+                                        <i class="fas fa-video"></i> 
+                                        {% if consultation.can_join_meeting %}
+                                            Join Video Meeting
+                                        {% else %}
+                                            Join Available {{ consultation.scheduled_date|timeuntil }}
+                                        {% endif %}
+                                    </a>
+                                    
+                                    <!-- Test Audio/Video -->
+                                    <button class="btn btn-outline test-equipment-btn">
+                                        <i class="fas fa-headset"></i> Test Equipment
+                                    </button>
+                                    
+                                    <!-- Copy Meeting Link -->
+                                    <button class="btn btn-outline copy-link-btn" data-link="{{ consultation.join_url }}">
+                                        <i class="fas fa-copy"></i> Copy Link
+                                    </button>
+                                </div>
+                                
+                                <!-- Video Preview/Test Area -->
+                                <div class="video-test-area" style="display: none;">
+                                    <div class="video-container">
+                                        <video id="localVideo{{ consultation.id }}" autoplay muted></video>
+                                        <div class="video-controls">
+                                            <button class="btn btn-sm btn-outline toggle-video-btn">
+                                                <i class="fas fa-video"></i> Camera
+                                            </button>
+                                            <button class="btn btn-sm btn-outline toggle-audio-btn">
+                                                <i class="fas fa-microphone"></i> Mic
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="video-test-instructions">
+                                        <p class="text-sm text-gray-400">
+                                            <i class="fas fa-info-circle"></i>
+                                            Test your camera and microphone before joining the meeting.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="no-video-setup">
+                                <p class="text-gray-400">
+                                    <i class="fas fa-sync fa-spin"></i>
+                                    Video meeting details are being generated...
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Preparation Checklist -->
+                        <div class="preparation-checklist">
+                            <h4 class="checklist-title">
+                                <i class="fas fa-clipboard-list"></i> Preparation Checklist
+                            </h4>
+                            <ul class="checklist-items">
+                                <li class="checklist-item">
+                                    <input type="checkbox" id="prep1-{{ consultation.id }}" class="checklist-checkbox">
+                                    <label for="prep1-{{ consultation.id }}">Test your audio and video equipment</label>
+                                </li>
+                                <li class="checklist-item">
+                                    <input type="checkbox" id="prep2-{{ consultation.id }}" class="checklist-checkbox">
+                                    <label for="prep2-{{ consultation.id }}">Prepare your portfolio details</label>
+                                </li>
+                                <li class="checklist-item">
+                                    <input type="checkbox" id="prep3-{{ consultation.id }}" class="checklist-checkbox">
+                                    <label for="prep3-{{ consultation.id }}">List your specific questions and goals</label>
+                                </li>
+                                <li class="checklist-item">
+                                    <input type="checkbox" id="prep4-{{ consultation.id }}" class="checklist-checkbox">
+                                    <label for="prep4-{{ consultation.id }}">Review recent market trends</label>
+                                </li>
+                                <li class="checklist-item">
+                                    <input type="checkbox" id="prep5-{{ consultation.id }}" class="checklist-checkbox">
+                                    <label for="prep5-{{ consultation.id }}">Have stable internet connection</label>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="session-actions">
+                            {% if consultation.can_join_meeting %}
+                            <a href="{{ consultation.join_url }}" target="_blank" class="btn btn-success join-meeting-main-btn">
+                                <i class="fas fa-video"></i> Join Meeting Now
+                            </a>
+                            {% endif %}
+                            
+                            <button class="btn btn-outline reschedule-btn" data-consultation-id="{{ consultation.id }}">
+                                <i class="fas fa-calendar-alt"></i> Reschedule
+                            </button>
+                            
+                            <button class="btn btn-outline cancel-btn" data-consultation-id="{{ consultation.id }}">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                            
+                            <a href="{% url 'book_consultation' %}" class="btn btn-outline">
+                                <i class="fas fa-plus"></i> Book Another
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <h3 class="empty-title">No Upcoming Sessions</h3>
+                    <p class="empty-description">You don't have any scheduled consultations yet.</p>
+                    <a href="{% url 'book_consultation' %}" class="btn btn-primary mt-4">
+                        <i class="fas fa-calendar-check"></i> Book Your First Consultation
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Completed Sessions Tab -->
+            <div id="completed-tab" class="tab-content">
+                {% if completed_consultations %}
+                <div class="space-y-6">
+                    {% for consultation in completed_consultations %}
+                    <div class="consultation-session-card completed">
+                        <div class="session-header">
+                            <div class="session-info">
+                                <h3 class="session-title">{{ consultation.title }}</h3>
+                                <div class="session-meta">
+                                    <span class="session-level level-{{ consultation.level }}">{{ consultation.get_level_display }}</span>
+                                    <span class="session-price">${{ consultation.price }}</span>
+                                    <span class="session-date">{{ consultation.scheduled_date|date:"M j, Y" }}</span>
+                                    {% if consultation.actual_duration %}
+                                    <span class="session-duration">{{ consultation.actual_duration }} min actual</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="session-status status-completed">
+                                <i class="fas fa-check-circle"></i>
+                                Completed
+                            </div>
+                        </div>
+
+                        <!-- Session Summary -->
+                        <div class="session-summary">
+                            <div class="summary-grid">
+                                <div class="summary-item">
+                                    <div class="summary-label">Scheduled Duration</div>
+                                    <div class="summary-value">{{ consultation.duration_minutes }} minutes</div>
+                                </div>
+                                {% if consultation.actual_duration %}
+                                <div class="summary-item">
+                                    <div class="summary-label">Actual Duration</div>
+                                    <div class="summary-value">{{ consultation.actual_duration }} minutes</div>
+                                </div>
+                                {% endif %}
+                                <div class="summary-item">
+                                    <div class="summary-label">Payment Method</div>
+                                    <div class="summary-value">{{ consultation.get_payment_method_display }}</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Platform</div>
+                                    <div class="summary-value">{{ consultation.get_meeting_platform_display }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if consultation.feedback %}
+                        <div class="session-feedback">
+                            <h4 class="feedback-title">
+                                <i class="fas fa-comment-alt"></i> Session Notes
+                            </h4>
+                            <p class="feedback-content">{{ consultation.feedback }}</p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Rating Section -->
+                        <div class="rating-section">
+                            <h4 class="rating-title">
+                                <i class="fas fa-star"></i> Rate Your Session
+                            </h4>
+                            {% if consultation.rating %}
+                            <div class="current-rating">
+                                <div class="rating-stars">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= consultation.rating %}
+                                            <i class="fas fa-star" style="color: var(--binance-yellow);"></i>
+                                        {% else %}
+                                            <i class="far fa-star" style="color: var(--text-tertiary);"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="rating-text">You rated this session {{ consultation.rating }}/5</span>
+                            </div>
+                            {% else %}
+                            <div class="rating-interface">
+                                <div class="star-rating" data-consultation-id="{{ consultation.id }}">
+                                    {% for i in "12345" %}
+                                        <i class="far fa-star rating-star" data-rating="{{ forloop.counter }}"></i>
+                                    {% endfor %}
+                                </div>
+                                <textarea class="feedback-textarea" placeholder="Share your feedback about this session (optional)" data-consultation-id="{{ consultation.id }}"></textarea>
+                                <button class="btn btn-primary submit-rating-btn" data-consultation-id="{{ consultation.id }}">
+                                    <i class="fas fa-paper-plane"></i> Submit Rating
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="session-actions">
+                            <button class="btn btn-outline add-feedback-btn" data-consultation-id="{{ consultation.id }}">
+                                <i class="fas fa-edit"></i> Add Feedback
+                            </button>
+                            <button class="btn btn-outline view-notes-btn" data-consultation-id="{{ consultation.id }}">
+                                <i class="fas fa-sticky-note"></i> View Notes
+                            </button>
+                            <a href="{% url 'book_consultation' %}" class="btn btn-primary">
+                                <i class="fas fa-redo"></i> Book Again
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h3 class="empty-title">No Completed Sessions</h3>
+                    <p class="empty-description">Your completed consultations will appear here.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cancelled Sessions Tab -->
+            <div id="cancelled-tab" class="tab-content">
+                {% if cancelled_consultations %}
+                <div class="space-y-6">
+                    {% for consultation in cancelled_consultations %}
+                    <div class="consultation-session-card cancelled">
+                        <div class="session-header">
+                            <div class="session-info">
+                                <h3 class="session-title">{{ consultation.title }}</h3>
+                                <div class="session-meta">
+                                    <span class="session-level level-{{ consultation.level }}">{{ consultation.get_level_display }}</span>
+                                    <span class="session-price">${{ consultation.price }}</span>
+                                    <span class="session-date">{{ consultation.scheduled_date|date:"M j, Y" }}</span>
+                                </div>
+                            </div>
+                            <div class="session-status status-cancelled">
+                                <i class="fas fa-times-circle"></i>
+                                Cancelled
+                            </div>
+                        </div>
+
+                        <div class="cancellation-info">
+                            <div class="info-item">
+                                <strong>Payment Status:</strong> 
+                                <span class="{% if consultation.payment_status == 'refunded' %}text-success{% else %}text-warning{% endif %}">
+                                    {{ consultation.get_payment_status_display }}
+                                </span>
+                            </div>
+                            {% if consultation.payment_status == 'refunded' %}
+                            <div class="info-item">
+                                <strong>Refund Amount:</strong> 
+                                <span class="text-success">${{ consultation.price }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="session-actions">
+                            <a href="{% url 'book_consultation' %}" class="btn btn-primary">
+                                <i class="fas fa-calendar-check"></i> Rebook Session
+                            </a>
+                            {% if consultation.payment_status != 'refunded' %}
+                            <button class="btn btn-outline request-refund-btn" data-consultation-id="{{ consultation.id }}">
+                                <i class="fas fa-undo"></i> Request Refund
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <h3 class="empty-title">No Cancelled Sessions</h3>
+                    <p class="empty-description">You haven't cancelled any consultations.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3 class="dashboard-card-title mb-4">Quick Actions</h3>
+                <div class="space-y-3">
+                    <a href="{% url 'book_consultation' %}" class="btn btn-primary w-full justify-center">
+                        <i class="fas fa-calendar-plus"></i> Book New Consultation
+                    </a>
+                    <a href="{% url 'marketplace' %}" class="btn btn-outline w-full justify-center">
+                        <i class="fas fa-store"></i> Browse Market Analysis
+                    </a>
+                    <a href="{% url 'wallet' %}" class="btn btn-outline w-full justify-center">
+                        <i class="fas fa-wallet"></i> Manage Wallet
+                    </a>
+                    <a href="{% url 'profile' %}" class="btn btn-outline w-full justify-center">
+                        <i class="fas fa-user-cog"></i> Update Profile
+                    </a>
+                </div>
+            </div>
+
+            <!-- Next Session Countdown -->
+            {% if next_consultation %}
+            <div class="dashboard-card">
+                <h3 class="dashboard-card-title mb-4">Next Session Countdown</h3>
+                <div class="countdown-timer" id="mainCountdown" data-date="{{ next_consultation.scheduled_date|date:'c' }}">
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-days">00</div>
+                        <div class="countdown-label">Days</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-hours">00</div>
+                        <div class="countdown-label">Hours</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-minutes">00</div>
+                        <div class="countdown-label">Minutes</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-seconds">00</div>
+                        <div class="countdown-label">Seconds</div>
+                    </div>
+                </div>
+                <p class="text-center text-gray-400 mt-4">
+                    <strong>{{ next_consultation.title }}</strong><br>
+                    {{ next_consultation.scheduled_date|date:"F j, Y" }} at {{ next_consultation.scheduled_date|time:"g:i A" }}
+                </p>
+                {% if next_consultation.can_join_meeting %}
+                <div class="text-center mt-4">
+                    <a href="{{ next_consultation.join_url }}" target="_blank" class="btn btn-success">
+                        <i class="fas fa-video"></i> Join Meeting Now
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Modals -->
+<!-- Reschedule Modal -->
+<div id="rescheduleModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Reschedule Consultation</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="rescheduleForm">
+                <input type="hidden" id="rescheduleConsultationId">
+                <div class="form-group">
+                    <label for="newDate">Select New Date & Time</label>
+                    <input type="datetime-local" id="newDate" class="form-input" required min="{% now 'Y-m-d\\TH:i' %}">
+                </div>
+                <div class="form-group">
+                    <label for="rescheduleReason">Reason for Rescheduling (Optional)</label>
+                    <textarea id="rescheduleReason" class="form-input" rows="3" placeholder="Let us know why you need to reschedule..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancelReschedule">Cancel</button>
+            <button class="btn btn-primary" id="confirmReschedule">Reschedule Session</button>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Modal -->
+<div id="cancelModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Cancel Consultation</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p class="text-gray-400 mb-4">Are you sure you want to cancel this consultation?</p>
+            <form id="cancelForm">
+                <input type="hidden" id="cancelConsultationId">
+                <div class="form-group">
+                    <label for="cancelReason">Reason for Cancellation</label>
+                    <select id="cancelReason" class="form-input" required>
+                        <option value="">Select a reason...</option>
+                        <option value="schedule_conflict">Schedule Conflict</option>
+                        <option value="no_longer_needed">No Longer Needed</option>
+                        <option value="found_alternative">Found Alternative</option>
+                        <option value="technical_issues">Technical Issues</option>
+                        <option value="emergency">Emergency</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cancelDetails">Additional Details (Optional)</label>
+                    <textarea id="cancelDetails" class="form-input" rows="3" placeholder="Provide more context..."></textarea>
+                </div>
+                <div class="refund-option">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="requestRefund" checked>
+                        <span class="checkmark"></span>
+                        Request refund to wallet balance
+                    </label>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="dontCancel">Don't Cancel</button>
+            <button class="btn btn-danger" id="confirmCancel">Cancel Session</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Feedback Modal -->
+<div id="feedbackModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Add Session Feedback</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="feedbackForm">
+                <input type="hidden" id="feedbackConsultationId">
+                <div class="form-group">
+                    <label for="sessionFeedback">Your Feedback</label>
+                    <textarea id="sessionFeedback" class="form-input" rows="6" placeholder="Share your experience, what you learned, suggestions for improvement..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancelFeedback">Cancel</button>
+            <button class="btn btn-primary" id="saveFeedback">Save Feedback</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Consultation Session Cards */
+    .consultation-session-card {
+        background: var(--binance-card);
+        border: 1px solid var(--binance-border);
+        border-radius: 8px;
+        padding: 24px;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .consultation-session-card:hover {
+        border-color: var(--binance-yellow);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(240, 185, 11, 0.1);
+    }
+
+    .consultation-session-card.upcoming {
+        border-left: 4px solid var(--binance-yellow);
+    }
+
+    .consultation-session-card.completed {
+        border-left: 4px solid var(--binance-green);
+        opacity: 0.9;
+    }
+
+    .consultation-session-card.cancelled {
+        border-left: 4px solid var(--binance-red);
+        opacity: 0.7;
+    }
+
+    .session-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .session-info {
+        flex: 1;
+    }
+
+    .session-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+    }
+
+    .session-meta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .session-level, .session-price, .session-duration, .session-date {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .session-level {
+        background: rgba(1, 122, 255, 0.2);
+        color: var(--binance-blue);
+    }
+
+    .session-price {
+        background: rgba(240, 185, 11, 0.2);
+        color: var(--binance-yellow);
+    }
+
+    .session-duration, .session-date {
+        background: rgba(132, 142, 156, 0.2);
+        color: var(--text-secondary);
+    }
+
+    .session-status {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-scheduled {
+        background: rgba(240, 185, 11, 0.2);
+        color: var(--binance-yellow);
+    }
+
+    .status-completed {
+        background: rgba(3, 166, 109, 0.2);
+        color: var(--binance-green);
+    }
+
+    .status-cancelled {
+        background: rgba(207, 48, 74, 0.2);
+        color: var(--binance-red);
+    }
+
+    .session-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+        padding: 16px;
+        background: var(--binance-card-light);
+        border-radius: 8px;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .session-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--binance-border);
+    }
+
+    /* Video Consultation Styles */
+    .video-consultation-section {
+        border-top: 1px solid var(--binance-border);
+        padding-top: 20px;
+        margin-top: 20px;
+    }
+
+    .video-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .video-details {
+        background: var(--binance-card-light);
+        border-radius: 8px;
+        padding: 16px;
+    }
+
+    .video-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+        font-size: 0.9rem;
+    }
+
+    .video-platform, .meeting-id, .meeting-password {
+        padding: 8px;
+        background: var(--binance-dark);
+        border-radius: 4px;
+        border: 1px solid var(--binance-border);
+    }
+
+    .video-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .join-meeting-btn, .join-meeting-main-btn {
+        background: var(--binance-green);
+        border-color: var(--binance-green);
+        color: white;
+    }
+
+    .join-meeting-btn:hover, .join-meeting-main-btn:hover {
+        background: #02b574;
+        border-color: #02b574;
+    }
+
+    .join-meeting-btn:disabled, .join-meeting-main-btn:disabled {
+        background: var(--text-tertiary);
+        border-color: var(--text-tertiary);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .video-test-area {
+        margin-top: 16px;
+    }
+
+    .video-container {
+        position: relative;
+        background: var(--binance-dark);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--binance-border);
+        margin-bottom: 8px;
+    }
+
+    .video-container video {
+        width: 100%;
+        max-height: 300px;
+        background: #000;
+    }
+
+    .video-controls {
+        position: absolute;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+    }
+
+    .video-test-instructions {
+        text-align: center;
+        padding: 8px;
+    }
+
+    /* Preparation Checklist */
+    .preparation-checklist {
+        border-top: 1px solid var(--binance-border);
+        padding-top: 20px;
+        margin-top: 20px;
+    }
+
+    .checklist-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .checklist-items {
+        list-style: none;
+        space-y: 12px;
+    }
+
+    .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .checklist-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .checklist-checkbox {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 2px solid var(--binance-border);
+        background: var(--binance-dark);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .checklist-checkbox:checked {
+        background: var(--binance-yellow);
+        border-color: var(--binance-yellow);
+    }
+
+    .checklist-checkbox:checked::after {
+        content: "✓";
+        color: #000;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    /* Session Summary */
+    .session-summary {
+        background: rgba(1, 122, 255, 0.1);
+        border: 1px solid rgba(1, 122, 255, 0.3);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+    }
+
+    .summary-item {
+        text-align: center;
+    }
+
+    .summary-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+    }
+
+    .summary-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .session-feedback {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .feedback-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--binance-green);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .feedback-content {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    /* Rating Section */
+    .rating-section {
+        background: rgba(240, 185, 11, 0.1);
+        border: 1px solid rgba(240, 185, 11, 0.3);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .rating-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--binance-yellow);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .current-rating {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 4px;
+    }
+
+    .rating-text {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .rating-interface {
+        space-y: 16px;
+    }
+
+    .star-rating {
+        display: flex;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .rating-star {
+        font-size: 1.5rem;
+        color: var(--text-tertiary);
+        transition: color 0.3s ease;
+    }
+
+    .rating-star:hover,
+    .rating-star.active {
+        color: var(--binance-yellow);
+    }
+
+    .feedback-textarea {
+        width: 100%;
+        padding: 12px;
+        background: var(--binance-dark);
+        border: 1px solid var(--binance-border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .feedback-textarea:focus {
+        outline: none;
+        border-color: var(--binance-yellow);
+    }
+
+    .submit-rating-btn {
+        margin-top: 8px;
+    }
+
+    /* Cancellation Info */
+    .cancellation-info {
+        background: rgba(207, 48, 74, 0.1);
+        border: 1px solid rgba(207, 48, 74, 0.3);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .info-item {
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+    }
+
+    .text-success {
+        color: var(--binance-green);
+    }
+
+    .text-warning {
+        color: var(--binance-yellow);
+    }
+
+    /* Countdown Timer */
+    .countdown-timer {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 24px;
+        background: var(--binance-card-light);
+        border-radius: 8px;
+        border: 1px solid var(--binance-border);
+    }
+
+    .countdown-item {
+        text-align: center;
+    }
+
+    .countdown-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--binance-yellow);
+        line-height: 1;
+    }
+
+    .countdown-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Tab Styles */
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .tabs-header {
+        display: flex;
+        border-bottom: 1px solid var(--binance-border);
+        padding: 0 24px;
+    }
+
+    .tab-btn {
+        background: none;
+        border: none;
+        padding: 16px 24px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tab-btn.active {
+        color: var(--binance-yellow);
+    }
+
+    .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--binance-yellow);
+    }
+
+    /* Empty States */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--binance-card-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .empty-description {
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: var(--binance-card);
+        border-radius: 8px;
+        border: 1px solid var(--binance-border);
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px;
+        border-bottom: 1px solid var(--binance-border);
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+    }
+
+    .modal-close:hover {
+        background: var(--binance-hover);
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding: 24px;
+        border-top: 1px solid var(--binance-border);
+    }
+
+    .btn-danger {
+        background: var(--binance-red);
+        color: white;
+        border: 1px solid var(--binance-red);
+    }
+
+    .btn-danger:hover {
+        background: #d93a54;
+        border-color: #d93a54;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px;
+        background: var(--binance-dark);
+        border: 1px solid var(--binance-border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--binance-yellow);
+    }
+
+    .refund-option {
+        margin-top: 16px;
+        padding: 16px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 8px;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        display: none;
+    }
+
+    .checkmark {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--binance-border);
+        border-radius: 4px;
+        background: var(--binance-dark);
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-label input[type="checkbox"]:checked + .checkmark {
+        background: var(--binance-yellow);
+        border-color: var(--binance-yellow);
+    }
+
+    .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+        content: "✓";
+        color: #000;
+        font-weight: bold;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.75rem;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .dashboard-card {
+        background: var(--binance-card);
+        border: 1px solid var(--binance-border);
+        border-radius: 8px;
+        padding: 24px;
+        transition: var(--transition);
+    }
+
+    .dashboard-card:hover {
+        border-color: var(--binance-yellow);
+    }
+
+    .dashboard-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .dashboard-card-title {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .crypto-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--binance-yellow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 1.125rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .session-header {
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .session-actions {
+            flex-direction: column;
+        }
+
+        .session-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .countdown-timer {
+            padding: 16px;
+        }
+
+        .countdown-value {
+            font-size: 1.5rem;
+        }
+
+        .session-details {
+            grid-template-columns: 1fr;
+        }
+
+        .video-info {
+            grid-template-columns: 1fr;
+        }
+
+        .video-actions {
+            flex-direction: column;
+        }
+
+        .video-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+            width: 95%;
+            margin: 16px;
+        }
+
+        .modal-footer {
+            flex-direction: column;
+        }
+
+        .tabs-header {
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .tab-btn {
+            padding: 16px;
+            border-bottom: 1px solid var(--binance-border);
+        }
+
+        .tab-btn.active::after {
+            display: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .session-meta {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .session-level, .session-price, .session-duration, .session-date {
+            width: fit-content;
+        }
+
+        .countdown-timer {
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .countdown-item {
+            flex: 1;
+            min-width: 70px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab functionality
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                
+                // Update active tab button
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update active tab content
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            });
+        });
+
+        // Countdown functionality
+        function updateCountdowns() {
+            const countdowns = document.querySelectorAll('.countdown');
+            
+            countdowns.forEach(countdown => {
+                const targetDate = new Date(countdown.getAttribute('data-date'));
+                const now = new Date();
+                const diff = targetDate - now;
+
+                if (diff <= 0) {
+                    countdown.textContent = 'Session started';
+                    countdown.style.color = 'var(--binance-green)';
+                    
+                    // Update join button if session has started
+                    const consultationCard = countdown.closest('.consultation-session-card');
+                    if (consultationCard) {
+                        const joinBtn = consultationCard.querySelector('.join-meeting-btn');
+                        if (joinBtn) {
+                            joinBtn.innerHTML = '<i class="fas fa-video"></i> Join Meeting Now';
+                            joinBtn.classList.remove('btn-outline');
+                            joinBtn.classList.add('btn-success');
+                            joinBtn.disabled = false;
+                        }
+                    }
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                if (days > 0) {
+                    countdown.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                    countdown.style.color = 'var(--binance-yellow)';
+                } else if (hours > 0) {
+                    countdown.textContent = `${hours}h ${minutes}m ${seconds}s`;
+                    countdown.style.color = 'var(--binance-yellow)';
+                } else {
+                    countdown.textContent = `${minutes}m ${seconds}s`;
+                    countdown.style.color = 'var(--binance-red)';
+                }
+            });
+
+            // Update main countdown timer
+            const mainCountdown = document.getElementById('mainCountdown');
+            if (mainCountdown) {
+                const targetDate = new Date(mainCountdown.getAttribute('data-date'));
+                const now = new Date();
+                const diff = targetDate - now;
+
+                if (diff > 0) {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    document.getElementById('countdown-days').textContent = days.toString().padStart(2, '0');
+                    document.getElementById('countdown-hours').textContent = hours.toString().padStart(2, '0');
+                    document.getElementById('countdown-minutes').textContent = minutes.toString().padStart(2, '0');
+                    document.getElementById('countdown-seconds').textContent = seconds.toString().padStart(2, '0');
+                } else {
+                    // Session has started, update the main countdown
+                    document.getElementById('countdown-days').textContent = '00';
+                    document.getElementById('countdown-hours').textContent = '00';
+                    document.getElementById('countdown-minutes').textContent = '00';
+                    document.getElementById('countdown-seconds').textContent = '00';
+                    
+                    // Update join button in main countdown section
+                    const joinBtn = document.querySelector('.dashboard-card .btn-success');
+                    if (joinBtn) {
+                        joinBtn.style.display = 'block';
+                    }
+                }
+            }
+        }
+
+        // Update countdowns every second
+        setInterval(updateCountdowns, 1000);
+        updateCountdowns();
+
+        // Modal functionality
+        const modals = {
+            reschedule: document.getElementById('rescheduleModal'),
+            cancel: document.getElementById('cancelModal'),
+            feedback: document.getElementById('feedbackModal')
+        };
+
+        function openModal(modalName, consultationId) {
+            modals[modalName].classList.add('active');
+            document.getElementById(modalName + 'ConsultationId').value = consultationId;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalName) {
+            modals[modalName].classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Reschedule buttons
+        document.querySelectorAll('.reschedule-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const consultationId = this.getAttribute('data-consultation-id');
+                openModal('reschedule', consultationId);
+            });
+        });
+
+        // Cancel buttons
+        document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const consultationId = this.getAttribute('data-consultation-id');
+                openModal('cancel', consultationId);
+            });
+        });
+
+        // Add feedback buttons
+        document.querySelectorAll('.add-feedback-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const consultationId = this.getAttribute('data-consultation-id');
+                openModal('feedback', consultationId);
+            });
+        });
+
+        // Request refund buttons
+        document.querySelectorAll('.request-refund-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const consultationId = this.getAttribute('data-consultation-id');
+                alert('Refund request submitted! Our team will review your request within 24 hours.');
+                // In a real implementation, this would make an API call
+            });
+        });
+
+        // Close modal buttons
+        document.querySelectorAll('.modal-close, #cancelReschedule, #dontCancel, #cancelFeedback').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // Form submissions
+        document.getElementById('confirmReschedule').addEventListener('click', function() {
+            const consultationId = document.getElementById('rescheduleConsultationId').value;
+            const newDate = document.getElementById('newDate').value;
+            const reason = document.getElementById('rescheduleReason').value;
+
+            if (!newDate) {
+                alert('Please select a new date and time.');
+                return;
+            }
+
+            // Here you would typically make an AJAX call to your backend
+            console.log('Rescheduling consultation:', { consultationId, newDate, reason });
+            alert('Reschedule request submitted! We will contact you to confirm the new time.');
+            closeModal('reschedule');
+        });
+
+        document.getElementById('confirmCancel').addEventListener('click', function() {
+            const consultationId = document.getElementById('cancelConsultationId').value;
+            const reason = document.getElementById('cancelReason').value;
+            const details = document.getElementById('cancelDetails').value;
+            const requestRefund = document.getElementById('requestRefund').checked;
+
+            if (!reason) {
+                alert('Please select a cancellation reason.');
+                return;
+            }
+
+            // Here you would typically make an AJAX call to your backend
+            console.log('Cancelling consultation:', { 
+                consultationId, 
+                reason, 
+                details, 
+                requestRefund 
+            });
+            
+            const refundMsg = requestRefund ? ' A refund will be processed to your wallet.' : '';
+            alert('Cancellation request submitted!' + refundMsg);
+            closeModal('cancel');
+        });
+
+        document.getElementById('saveFeedback').addEventListener('click', function() {
+            const consultationId = document.getElementById('feedbackConsultationId').value;
+            const feedback = document.getElementById('sessionFeedback').value;
+
+            if (!feedback.trim()) {
+                alert('Please provide some feedback.');
+                return;
+            }
+
+            // Here you would typically make an AJAX call to your backend
+            console.log('Saving feedback:', { consultationId, feedback });
+            alert('Thank you for your feedback!');
+            closeModal('feedback');
+        });
+
+        // Star rating functionality
+        document.querySelectorAll('.rating-star').forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = this.getAttribute('data-rating');
+                const consultationId = this.closest('.star-rating').getAttribute('data-consultation-id');
+                
+                // Update stars visually
+                const stars = this.parentElement.querySelectorAll('.rating-star');
+                stars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.remove('far');
+                        s.classList.add('fas', 'active');
+                    } else {
+                        s.classList.remove('fas', 'active');
+                        s.classList.add('far');
+                    }
+                });
+                
+                // Store rating for submission
+                this.closest('.rating-interface').setAttribute('data-current-rating', rating);
+            });
+        });
+
+        // Submit rating
+        document.querySelectorAll('.submit-rating-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const consultationId = this.getAttribute('data-consultation-id');
+                const ratingInterface = this.closest('.rating-interface');
+                const rating = ratingInterface.getAttribute('data-current-rating');
+                const feedback = ratingInterface.querySelector('.feedback-textarea').value;
+
+                if (!rating) {
+                    alert('Please select a rating by clicking on the stars.');
+                    return;
+                }
+
+                // Here you would typically make an AJAX call to your backend
+                console.log('Submitting rating:', { consultationId, rating, feedback });
+                alert('Thank you for your rating!');
+                
+                // Update UI to show the submitted rating
+                const ratingSection = this.closest('.rating-section');
+                ratingSection.innerHTML = `
+                    <h4 class="rating-title">
+                        <i class="fas fa-star"></i> Rate Your Session
+                    </h4>
+                    <div class="current-rating">
+                        <div class="rating-stars">
+                            ${'<i class="fas fa-star" style="color: var(--binance-yellow);"></i>'.repeat(rating)}
+                            ${'<i class="far fa-star" style="color: var(--text-tertiary);"></i>'.repeat(5 - rating)}
+                        </div>
+                        <span class="rating-text">You rated this session ${rating}/5</span>
+                    </div>
+                `;
+            });
+        });
+
+        // Checklist functionality
+        document.querySelectorAll('.checklist-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const consultationId = this.id.split('-')[1];
+                const itemIndex = this.id.split('-')[0].replace('prep', '');
+                
+                // Save checklist progress to localStorage
+                const key = `consultation_prep_${consultationId}`;
+                let progress = JSON.parse(localStorage.getItem(key)) || {};
+                progress[itemIndex] = this.checked;
+                localStorage.setItem(key, JSON.stringify(progress));
+            });
+
+            // Load saved checklist progress
+            const consultationId = checkbox.id.split('-')[1];
+            const itemIndex = checkbox.id.split('-')[0].replace('prep', '');
+            const key = `consultation_prep_${consultationId}`;
+            const progress = JSON.parse(localStorage.getItem(key)) || {};
+            
+            if (progress[itemIndex]) {
+                checkbox.checked = true;
+            }
+        });
+
+        // Video consultation functionality
+        document.querySelectorAll('.test-equipment-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const consultationCard = this.closest('.consultation-session-card');
+                const consultationId = consultationCard.dataset.consultationId;
+                const testArea = consultationCard.querySelector('.video-test-area');
+                
+                if (testArea.style.display === 'none') {
+                    testArea.style.display = 'block';
+                    startVideoTest(consultationId);
+                } else {
+                    testArea.style.display = 'none';
+                    stopVideoTest(consultationId);
+                }
+            });
+        });
+
+        // Copy meeting link
+        document.querySelectorAll('.copy-link-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const link = this.getAttribute('data-link');
+                navigator.clipboard.writeText(link).then(() => {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                    }, 2000);
+                }).catch(() => {
+                    alert('Failed to copy link. Please copy it manually.');
+                });
+            });
+        });
+
+        // Toggle video/audio in test
+        document.querySelectorAll('.toggle-video-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const consultationCard = this.closest('.consultation-session-card');
+                const consultationId = consultationCard.dataset.consultationId;
+                const video = document.getElementById(`localVideo${consultationId}`);
+                if (video.srcObject) {
+                    const videoTrack = video.srcObject.getVideoTracks()[0];
+                    if (videoTrack) {
+                        videoTrack.enabled = !videoTrack.enabled;
+                        this.classList.toggle('btn-outline');
+                        this.classList.toggle('btn-primary');
+                        this.innerHTML = videoTrack.enabled ? 
+                            '<i class="fas fa-video"></i> Camera' : 
+                            '<i class="fas fa-video-slash"></i> Camera';
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.toggle-audio-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const consultationCard = this.closest('.consultation-session-card');
+                const consultationId = consultationCard.dataset.consultationId;
+                const video = document.getElementById(`localVideo${consultationId}`);
+                if (video.srcObject) {
+                    const audioTrack = video.srcObject.getAudioTracks()[0];
+                    if (audioTrack) {
+                        audioTrack.enabled = !audioTrack.enabled;
+                        this.classList.toggle('btn-outline');
+                        this.classList.toggle('btn-primary');
+                        this.innerHTML = audioTrack.enabled ? 
+                            '<i class="fas fa-microphone"></i> Mic' : 
+                            '<i class="fas fa-microphone-slash"></i> Mic';
+                    }
+                }
+            });
+        });
+
+        // Auto-refresh page every 2 minutes to update session status
+        setInterval(() => {
+            // You could add a more sophisticated refresh logic here
+            // For now, we'll just update the countdowns which already refresh every second
+        }, 120000);
+
+        // Add keyboard shortcut to book new consultation
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'b') {
+                e.preventDefault();
+                window.location.href = "{% url 'book_consultation' %}";
+            }
+        });
+    });
+
+    // Video test functions
+    async function startVideoTest(consultationId) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: true, 
+                audio: true 
+            });
+            const video = document.getElementById(`localVideo${consultationId}`);
+            video.srcObject = stream;
+        } catch (error) {
+            console.error('Error accessing media devices:', error);
+            alert('Unable to access camera or microphone. Please check your permissions and make sure you are using HTTPS.');
+        }
+    }
+
+    function stopVideoTest(consultationId) {
+        const video = document.getElementById(`localVideo${consultationId}`);
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+        }
+    }
+</script>
+{% endblock %}

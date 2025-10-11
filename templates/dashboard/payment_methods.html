@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Payment Methods - Cons-App{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 2rem auto;">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+        <h1 style="font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #ffffff;">
+            Payment Methods
+        </h1>
+        <p style="color: #94a3b8; font-size: 1.125rem;">
+            Manage your payment options
+        </p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div style="margin-bottom: 2rem;">
+        {% for message in messages %}
+        <div style="padding: 1rem; border-radius: 0.5rem; 
+            {% if message.tags == 'success' %}
+                background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.5); color: #86efac;
+            {% elif message.tags == 'error' %}
+                background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5;
+            {% else %}
+                background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.5); color: #93c5fd;
+            {% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Payment Methods Form -->
+    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.75rem; padding: 2rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 600; color: #ffffff; margin-bottom: 1.5rem;">
+            Configure Payment Methods
+        </h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Display Form Errors -->
+            {% if form.errors %}
+            <div style="padding: 1rem; border-radius: 0.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; margin-bottom: 1.5rem;">
+                <strong style="display: block; margin-bottom: 0.5rem;">Please correct the following errors:</strong>
+                <ul style="margin: 0; padding-left: 1.5rem;">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Preferred Payment Method Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.25rem; font-weight: 600; color: #ffffff; margin-bottom: 1rem;">
+                    Preferred Payment Method *
+                </h3>
+                <p style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 1rem;">
+                    Select your default payment method for deposits and withdrawals
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <!-- M-Pesa Option -->
+                    <div>
+                        <input type="radio" 
+                               name="preferred_method" 
+                               id="preferred_method_mpesa"
+                               value="mpesa" 
+                               {% if form.preferred_method.value == 'mpesa' or not form.preferred_method.value and user_wallet.preferred_method == 'mpesa' %}checked{% endif %}
+                               style="display: none;">
+                        <label for="preferred_method_mpesa" style="display: block; cursor: pointer; margin: 0;">
+                            <div style="padding: 1.5rem; background: {% if form.preferred_method.value == 'mpesa' or not form.preferred_method.value and user_wallet.preferred_method == 'mpesa' %}rgba(0, 179, 0, 0.1){% else %}rgba(255, 255, 255, 0.05){% endif %}; 
+                                    border: 2px solid {% if form.preferred_method.value == 'mpesa' or not form.preferred_method.value and user_wallet.preferred_method == 'mpesa' %}#00B300{% else %}rgba(255, 255, 255, 0.2){% endif %}; 
+                                    border-radius: 0.75rem; text-align: center; transition: all 0.3s ease; height: 100%;">
+                                <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #00B300, #008000); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                                    <span style="color: white; font-weight: bold; font-size: 1.2rem;">M</span>
+                                </div>
+                                <div style="color: #ffffff; font-weight: 600; margin-bottom: 0.5rem;">M-Pesa</div>
+                                <div style="color: #94a3b8; font-size: 0.75rem;">Mobile Money</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- PayPal Option -->
+                    <div>
+                        <input type="radio" 
+                               name="preferred_method" 
+                               id="preferred_method_paypal"
+                               value="paypal" 
+                               {% if form.preferred_method.value == 'paypal' or not form.preferred_method.value and user_wallet.preferred_method == 'paypal' %}checked{% endif %}
+                               style="display: none;">
+                        <label for="preferred_method_paypal" style="display: block; cursor: pointer; margin: 0;">
+                            <div style="padding: 1.5rem; background: {% if form.preferred_method.value == 'paypal' or not form.preferred_method.value and user_wallet.preferred_method == 'paypal' %}rgba(0, 112, 186, 0.1){% else %}rgba(255, 255, 255, 0.05){% endif %}; 
+                                    border: 2px solid {% if form.preferred_method.value == 'paypal' or not form.preferred_method.value and user_wallet.preferred_method == 'paypal' %}#0070BA{% else %}rgba(255, 255, 255, 0.2){% endif %}; 
+                                    border-radius: 0.75rem; text-align: center; transition: all 0.3s ease; height: 100%;">
+                                <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #0070BA, #1546A0); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                                    <span style="color: white; font-weight: bold; font-size: 1.2rem;">P</span>
+                                </div>
+                                <div style="color: #ffffff; font-weight: 600; margin-bottom: 0.5rem;">PayPal</div>
+                                <div style="color: #94a3b8; font-size: 0.75rem;">International</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {% if form.preferred_method.errors %}
+                <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;">
+                    {% for error in form.preferred_method.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- M-Pesa Section -->
+            <div style="margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #00B300, #008000); display: flex; align-items: center; justify-content: center;">
+                        <span style="color: white; font-weight: bold; font-size: 1.2rem;">M</span>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #ffffff; margin: 0;">
+                            M-Pesa
+                        </h3>
+                        <p style="color: #94a3b8; font-size: 0.875rem; margin: 0;">
+                            Mobile money payments and withdrawals
+                        </p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="id_mpesa_number" style="display: block; font-size: 0.875rem; font-weight: 500; color: #94a3b8; margin-bottom: 0.5rem;">
+                        M-Pesa Phone Number
+                    </label>
+                    <input type="text" 
+                           name="mpesa_number" 
+                           id="id_mpesa_number"
+                           placeholder="+254712345678"
+                           value="{{ form.mpesa_number.value|default:user_wallet.mpesa_number|default:'' }}"
+                           style="width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid {% if form.mpesa_number.errors %}#ef4444{% else %}rgba(255, 255, 255, 0.2){% endif %}; border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;">
+                    {% if form.mpesa_number.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;">
+                        {% for error in form.mpesa_number.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.5rem;">
+                        Enter your M-Pesa registered phone number with country code
+                    </div>
+                </div>
+            </div>
+
+            <!-- PayPal Section -->
+            <div style="margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #0070BA, #1546A0); display: flex; align-items: center; justify-content: center;">
+                        <span style="color: white; font-weight: bold; font-size: 1.2rem;">P</span>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #ffffff; margin: 0;">
+                            PayPal
+                        </h3>
+                        <p style="color: #94a3b8; font-size: 0.875rem; margin: 0;">
+                            International payments and withdrawals
+                        </p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="id_paypal_email" style="display: block; font-size: 0.875rem; font-weight: 500; color: #94a3b8; margin-bottom: 0.5rem;">
+                        PayPal Email Address
+                    </label>
+                    <input type="email" 
+                           name="paypal_email" 
+                           id="id_paypal_email"
+                           placeholder="your-email@example.com"
+                           value="{{ form.paypal_email.value|default:user_wallet.paypal_email|default:'' }}"
+                           style="width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid {% if form.paypal_email.errors %}#ef4444{% else %}rgba(255, 255, 255, 0.2){% endif %}; border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;">
+                    {% if form.paypal_email.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;">
+                        {% for error in form.paypal_email.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.5rem;">
+                        Enter the email address associated with your PayPal account
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button type="submit" 
+                        style="padding: 1rem 1.5rem; background: #10b981; color: white; border: 2px solid #10b981; border-radius: 0.75rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <i class="fas fa-save"></i>
+                    Save Payment Methods
+                </button>
+                
+                <a href="{% url 'wallet' %}" 
+                   style="padding: 1rem 1.5rem; background: transparent; color: #94a3b8; border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 0.75rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Wallet
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.75rem; padding: 2rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 600; color: #ffffff; margin-bottom: 1.5rem;">
+            Recent Transactions
+        </h2>
+        
+        {% if transactions %}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for transaction in transactions %}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: {% if transaction.transaction_type == 'deposit' %}rgba(16, 185, 129, 0.2){% else %}rgba(239, 68, 68, 0.2){% endif %};">
+                        <span style="font-size: 1.2rem;">
+                            {% if transaction.transaction_type == 'deposit' %}⬇️{% else %}⬆️{% endif %}
+                        </span>
+                    </div>
+                    <div>
+                        <div style="color: #ffffff; font-weight: 500;">
+                            {{ transaction.description }}
+                        </div>
+                        <div style="color: #94a3b8; font-size: 0.875rem;">
+                            {{ transaction.created_at|date:"M j, Y g:i A" }} • {{ transaction.payment_method|title }}
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="color: {% if transaction.transaction_type == 'deposit' %}#10b981{% else %}#ef4444{% endif %}; font-weight: 700;">
+                        {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}${{ transaction.amount }}
+                    </div>
+                    <div style="color: #94a3b8; font-size: 0.875rem; text-transform: capitalize;">
+                        {{ transaction.status }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; color: #94a3b8;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">💳</div>
+            <div>No transactions yet</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+a:hover, button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+}
+
+button[type="submit"]:hover {
+    background: transparent !important;
+    color: #10b981 !important;
+}
+
+a:hover {
+    background: #3b82f6 !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
+}
+
+input:focus {
+    outline: none;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Style for radio card selections */
+label[for^="preferred_method_"] > div:hover {
+    border-color: #3b82f6 !important;
+    transform: translateY(-2px);
+}
+
+/* Ensure the hidden radio inputs are properly handled */
+input[type="radio"]:checked + label > div {
+    border-color: #3b82f6 !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Specific colors for each payment method when selected */
+#preferred_method_mpesa:checked + label > div {
+    border-color: #00B300 !important;
+    background: rgba(0, 179, 0, 0.1) !important;
+}
+
+#preferred_method_paypal:checked + label > div {
+    border-color: #0070BA !important;
+    background: rgba(0, 112, 186, 0.1) !important;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    div[style*="grid-template-columns: 1fr 1fr"]:first-of-type {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+
+<script>
+// Add interactivity to the payment method selection
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to update visual selection
+    function updateSelection() {
+        const mpesaCard = document.querySelector('label[for="preferred_method_mpesa"] > div');
+        const paypalCard = document.querySelector('label[for="preferred_method_paypal"] > div');
+        
+        // Reset both cards
+        mpesaCard.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        mpesaCard.style.background = 'rgba(255, 255, 255, 0.05)';
+        paypalCard.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        paypalCard.style.background = 'rgba(255, 255, 255, 0.05)';
+        
+        // Apply active styles based on checked radio
+        const checkedRadio = document.querySelector('input[name="preferred_method"]:checked');
+        if (checkedRadio) {
+            if (checkedRadio.value === 'mpesa') {
+                mpesaCard.style.borderColor = '#00B300';
+                mpesaCard.style.background = 'rgba(0, 179, 0, 0.1)';
+            } else if (checkedRadio.value === 'paypal') {
+                paypalCard.style.borderColor = '#0070BA';
+                paypalCard.style.background = 'rgba(0, 112, 186, 0.1)';
+            }
+        }
+    }
+    
+    // Add click event listeners to both cards
+    document.querySelectorAll('input[name="preferred_method"]').forEach(radio => {
+        radio.addEventListener('change', updateSelection);
+    });
+    
+    // Add click event to labels for better UX
+    document.querySelectorAll('label[for^="preferred_method_"]').forEach(label => {
+        label.addEventListener('click', function(e) {
+            // Prevent double triggering
+            e.stopPropagation();
+        });
+    });
+    
+    // Initialize selection on page load
+    updateSelection();
+    
+    // Form validation - ensure a payment method is selected before submit
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const preferredMethod = document.querySelector('input[name="preferred_method"]:checked');
+        if (!preferredMethod) {
+            e.preventDefault();
+            // Show error message
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = 'padding: 1rem; border-radius: 0.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; margin-bottom: 1.5rem;';
+            errorDiv.innerHTML = '<strong>Please select a preferred payment method.</strong>';
+            
+            const existingError = document.querySelector('div[style*="background: rgba(239, 68, 68, 0.1)"]');
+            if (existingError) {
+                existingError.parentNode.insertBefore(errorDiv, existingError.nextSibling);
+            } else {
+                const form = document.querySelector('form');
+                form.insertBefore(errorDiv, form.firstChild);
+            }
+            
+            // Scroll to error
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+});
+</script>
+{% endblock %}

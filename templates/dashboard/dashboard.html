@@ -1,0 +1,1231 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - CryptoConsult{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Binance-style Dashboard */
+.dashboard-container {
+    max-width: 1400px;
+    margin: 80px auto 2rem;
+    padding: 0 1rem;
+}
+
+/* Welcome Section - Binance Style */
+.welcome-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem 0;
+}
+
+.welcome-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #f0b90b;
+    margin-bottom: 0.25rem;
+}
+
+.welcome-subtitle {
+    color: #848e9c;
+    font-size: 0.95rem;
+}
+
+/* Stats Overview - Binance Grid Style */
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-item {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 4px;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.stat-item:hover {
+    border-color: #f0b90b;
+    background: #1a1f25;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: #848e9c;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.stat-change {
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.change-positive {
+    color: #03a66d;
+}
+
+.change-negative {
+    color: #cf304a;
+}
+
+/* Quick Actions - Binance Button Style */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.action-btn {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 4px;
+    padding: 1rem;
+    text-decoration: none;
+    color: #eaecef;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+}
+
+.action-btn:hover {
+    border-color: #f0b90b;
+    background: #1a1f25;
+    color: #eaecef;
+    text-decoration: none;
+}
+
+.action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background: #f0b90b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000000;
+    font-size: 1.1rem;
+}
+
+.action-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Section Headers - Binance Style */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #2b3139;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-link {
+    color: #f0b90b;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.section-link:hover {
+    color: #f0b90b;
+    text-decoration: underline;
+}
+
+/* Consultation Section Styles */
+.consultation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.consultation-card {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.consultation-card:hover {
+    border-color: #f0b90b;
+    background: #1a1f25;
+    transform: translateY(-2px);
+}
+
+.consultation-level {
+    position: absolute;
+    top: -10px;
+    right: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.level-basic {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.level-standard {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.level-premium {
+    background: rgba(168, 85, 247, 0.2);
+    color: #a855f7;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.level-vip {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.consultation-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.icon-basic {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.icon-standard {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.icon-premium {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.icon-vip {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.consultation-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin-bottom: 0.75rem;
+}
+
+.consultation-description {
+    color: #848e9c;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.consultation-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem 0;
+}
+
+.consultation-features li {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.consultation-features li:before {
+    content: "✓";
+    color: #22c55e;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.consultation-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #f0b90b;
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: rgba(240, 185, 11, 0.1);
+    border-radius: 6px;
+}
+
+.balance-check {
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+
+.balance-sufficient {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.balance-insufficient {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.balance-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.balance-label {
+    color: #94a3b8;
+}
+
+.balance-amount {
+    font-weight: 600;
+    color: #eaecef;
+}
+
+.balance-sufficient .balance-amount {
+    color: #22c55e;
+}
+
+.balance-insufficient .balance-amount {
+    color: #ef4444;
+}
+
+.consultation-booking-form {
+    margin-top: 1rem;
+}
+
+/* Market Insights Grid - Binance Table Style */
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.insight-card {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 4px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.insight-card:hover {
+    border-color: #f0b90b;
+    background: #1a1f25;
+}
+
+.insight-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.insight-crypto {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.insight-symbol {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    background: #2b3139;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #eaecef;
+    font-size: 0.9rem;
+}
+
+.insight-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin: 0;
+}
+
+.insight-recommendation {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2px;
+}
+
+.recommendation-buy {
+    color: #03a66d;
+    background: rgba(3, 166, 109, 0.1);
+}
+
+.recommendation-sell {
+    color: #cf304a;
+    background: rgba(207, 48, 74, 0.1);
+}
+
+.recommendation-hold {
+    color: #f0b90b;
+    background: rgba(240, 185, 11, 0.1);
+}
+
+.insight-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.insight-detail {
+    text-align: center;
+}
+
+.detail-label {
+    color: #848e9c;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+.detail-value {
+    color: #eaecef;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.insight-price {
+    color: #f0b90b;
+    font-weight: 700;
+}
+
+.insight-summary {
+    color: #848e9c;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Recent Activity - Binance List Style */
+.recent-activity {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 4px;
+    padding: 1.5rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #2b3139;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.icon-deposit {
+    background: rgba(3, 166, 109, 0.1);
+    color: #03a66d;
+}
+
+.icon-withdrawal {
+    background: rgba(207, 48, 74, 0.1);
+    color: #cf304a;
+}
+
+.icon-purchase {
+    background: rgba(240, 185, 11, 0.1);
+    color: #f0b90b;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    color: #eaecef;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0 0 0.25rem 0;
+}
+
+.activity-description {
+    color: #848e9c;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.activity-time {
+    color: #848e9c;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Purchased Analyses - Binance Card Style */
+.purchased-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.purchased-card {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 4px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.purchased-card:hover {
+    border-color: #f0b90b;
+    background: #1a1f25;
+}
+
+.purchased-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.purchased-symbol {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background: #2b3139;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #eaecef;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.purchased-info {
+    flex: 1;
+}
+
+.purchased-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin: 0 0 0.25rem 0;
+}
+
+.purchased-analyst {
+    color: #848e9c;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.purchased-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.purchased-price {
+    color: #f0b90b;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: center;
+    padding: 0.5rem;
+    background: rgba(240, 185, 11, 0.1);
+    border-radius: 4px;
+}
+
+/* Trading Tips - Binance Style */
+.trading-tips {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 4px;
+    padding: 1.5rem;
+}
+
+.tip-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #2b3139;
+}
+
+.tip-item:last-child {
+    border-bottom: none;
+}
+
+.tip-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    background: rgba(240, 185, 11, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f0b90b;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.tip-content {
+    flex: 1;
+}
+
+.tip-title {
+    color: #eaecef;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0 0 0.25rem 0;
+}
+
+.tip-description {
+    color: #848e9c;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #848e9c;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #eaecef;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Binance Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #f0b90b;
+    color: #000000;
+    border-color: #f0b90b;
+}
+
+.btn-primary:hover {
+    background: #e0ac0a;
+    border-color: #e0ac0a;
+    color: #000000;
+    text-decoration: none;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #f0b90b;
+    border-color: #f0b90b;
+}
+
+.btn-outline:hover {
+    background: #f0b90b;
+    color: #000000;
+    text-decoration: none;
+}
+
+.btn-w-full {
+    width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        margin: 70px auto 1rem;
+        padding: 0 0.5rem;
+    }
+    
+    .stats-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .consultation-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .purchased-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .insight-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .purchased-details {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <h1 class="welcome-title">
+            Welcome back, {{ request.user.first_name|default:request.user.username }}
+        </h1>
+        <p class="welcome-subtitle">
+            Track your crypto learning journey and market insights
+        </p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-overview">
+        <div class="stat-item">
+            <div class="stat-value">${{ user_wallet.balance|default:"0.00" }}</div>
+            <div class="stat-label">Available Balance</div>
+            <div class="stat-change change-positive">Ready to invest</div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-value">{{ purchased_count|default:"0" }}</div>
+            <div class="stat-label">Analyses Purchased</div>
+            <div class="stat-change change-positive">{{ purchased_analyses|length }} active</div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-value">${{ total_investment|default:"0.00" }}</div>
+            <div class="stat-label">Learning Investment</div>
+            <div class="stat-change change-positive">Building knowledge</div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-value">{{ consultation_count|default:"0" }}</div>
+            <div class="stat-label">Active Consultations</div>
+            <div class="stat-change change-positive">{{ user_consultations|length }} upcoming</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{% url 'marketplace' %}" class="action-btn">
+            <div class="action-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="action-title">Marketplace</div>
+        </a>
+        
+        <a href="{% url 'deposit' %}" class="action-btn">
+            <div class="action-icon">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="action-title">Add Funds</div>
+        </a>
+        
+        <a href="{% url 'purchase_analysis' %}" class="action-btn">
+            <div class="action-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="action-title">My Analyses</div>
+        </a>
+        
+        <a href="{% url 'my_consultations' %}" class="action-btn">
+            <div class="action-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="action-title">Consultations</div>
+        </a>
+    </div>
+
+    <!-- Consultation Section - Dynamic from Backend -->
+    <section class="features">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-users"></i>
+                Expert Training Consultations
+            </h2>
+            <a href="{% url 'book_consultation' %}" class="section-link">
+                View All Sessions
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="consultation-grid">
+            {% for package in consultation_packages %}
+            <div class="consultation-card">
+                <div class="consultation-level level-{{ package.level }}">{{ package.get_level_display }}</div>
+                <div class="consultation-icon icon-{{ package.level }}">
+                    <i class="{{ package.icon_class }}"></i>
+                </div>
+                <h3 class="consultation-title">{{ package.title }}</h3>
+                <p class="consultation-description">
+                    {{ package.description }}
+                </p>
+                <ul class="consultation-features">
+                    {% for feature in package.features %}
+                    <li>{{ feature }}</li>
+                    {% endfor %}
+                </ul>
+                <div class="consultation-price">${{ package.price }} / session</div>
+                
+                {% if user.is_authenticated %}
+                    <!-- Balance Check -->
+                    <div class="balance-check {% if user_wallet.balance >= package.price %}balance-sufficient{% else %}balance-insufficient{% endif %}">
+                        <div class="balance-info">
+                            <span class="balance-label">Your Balance:</span>
+                            <span class="balance-amount">${{ user_wallet.balance|default:"0.00" }}</span>
+                        </div>
+                    </div>
+                    
+                    <form method="post" action="{% url 'book_consultation' %}" class="consultation-booking-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="package_id" value="{{ package.id }}">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="color: #94a3b8; font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">
+                                Select Date & Time:
+                            </label>
+                            <input type="datetime-local" name="scheduled_date" required 
+                                   min="{% now 'Y-m-d\\TH:i' %}"
+                                   style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.5rem; color: #ffffff;">
+                        </div>
+                        <button type="submit" 
+                                class="btn {% if user_wallet.balance >= package.price %}btn-primary{% else %}btn-outline{% endif %}" 
+                                style="width: 100%; padding: 0.75rem; border: none; border-radius: 0.5rem; font-weight: 600; cursor: {% if user_wallet.balance >= package.price %}pointer{% else %}not-allowed{% endif %};"
+                                {% if user_wallet.balance < package.price %}disabled{% endif %}>
+                            <i class="fas fa-{% if user_wallet.balance >= package.price %}calendar-check{% else %}exclamation-triangle{% endif %}"></i>
+                            {% if user_wallet.balance >= package.price %}
+                                Book {{ package.get_level_display }} Session
+                            {% else %}
+                                Insufficient Balance
+                            {% endif %}
+                        </button>
+                        {% if user_wallet.balance < package.price %}
+                        <div style="text-align: center; margin-top: 0.5rem;">
+                            <a href="{% url 'deposit' %}" class="text-primary text-sm hover:underline" style="color: #f0b90b; text-decoration: none; font-size: 0.8rem;">
+                                Add funds to your wallet
+                            </a>
+                        </div>
+                        {% endif %}
+                    </form>
+                {% else %}
+                    <a href="{% url 'account_signup' %}" class="btn btn-primary" style="width: 100%; padding: 0.75rem; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; text-decoration: none; display: block; text-align: center;">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign Up to Book
+                    </a>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="consultation-card" style="grid-column: 1 / -1; text-align: center;">
+                <div class="consultation-icon icon-basic" style="margin: 0 auto 1rem;">
+                    <i class="fas fa-calendar-times"></i>
+                </div>
+                <h3 class="consultation-title">No Consultation Packages Available</h3>
+                <p class="consultation-description">
+                    Check back later for expert consultation sessions.
+                </p>
+                <div class="consultation-price">Coming Soon</div>
+                <button class="btn btn-outline" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; font-weight: 600; cursor: not-allowed;" disabled>
+                    <i class="fas fa-clock"></i>
+                    Check Back Later
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Quick Market Insights -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-bolt"></i>
+                Market Insights
+            </h2>
+            {% if market_insights %}
+            <a href="{% url 'market_insights' %}" class="section-link">
+                View All Insights
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="insights-grid">
+            {% for insight in market_insights %}
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-crypto">
+                        <div class="insight-symbol">
+                            {{ insight.symbol|default:"MI" }}
+                        </div>
+                        <h3 class="insight-name">{{ insight.cryptocurrency|default:"Market" }}</h3>
+                    </div>
+                    <div class="insight-recommendation" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                        {{ insight.get_insight_type_display }}
+                    </div>
+                </div>
+                
+                <div class="insight-details">
+                    <div class="insight-detail">
+                        <div class="detail-label">Urgency</div>
+                        <div class="detail-value" style="color: 
+                            {% if insight.urgency == 'normal' %}#22c55e
+                            {% elif insight.urgency == 'important' %}#f97316
+                            {% elif insight.urgency == 'urgent' %}#ef4444
+                            {% elif insight.urgency == 'critical' %}#8b45ff
+                            {% else %}#848e9c{% endif %};">
+                            {{ insight.get_urgency_display }}
+                        </div>
+                    </div>
+                    <div class="insight-detail">
+                        <div class="detail-label">Published</div>
+                        <div class="detail-value">{{ insight.published_at|date:"M d" }}</div>
+                    </div>
+                </div>
+                
+                <p class="insight-summary">
+                    {{ insight.summary|truncatewords:25 }}
+                </p>
+                
+                <a href="{% url 'view_market_insight' insight.id %}" class="btn btn-outline btn-w-full">
+                    Read Full Insight
+                </a>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📊</div>
+                <h3>No market insights available</h3>
+                <p>Check back later for the latest crypto market updates</p>
+                {% url 'market_insights' as market_insights_url %}
+                {% if market_insights_url %}
+                <a href="{% url 'market_insights' %}" class="btn btn-primary">
+                    Browse All Insights
+                </a>
+                {% else %}
+                <button class="btn btn-primary" disabled>
+                    Browse All Insights
+                </button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="dashboard-grid">
+        <!-- Main Content -->
+        <div>
+            <!-- Purchased Analyses -->
+            <section style="margin-bottom: 2rem;">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-bookmark"></i>
+                        Your Analyses
+                    </h2>
+                    <a href="{% url 'purchase_analysis' %}" class="section-link">
+                        View All
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                {% if purchased_analyses %}
+                <div class="purchased-grid">
+                    {% for purchase in purchased_analyses %}
+                    <div class="purchased-card">
+                        <div class="purchased-header">
+                            <div class="purchased-symbol">
+                                {{ purchase.analysis.symbol }}
+                            </div>
+                            <div class="purchased-info">
+                                <h3 class="purchased-title">{{ purchase.analysis.cryptocurrency }}</h3>
+                                <p class="purchased-analyst">By {{ purchase.analysis.analyst.user.get_full_name|default:purchase.analysis.analyst.user.username }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="purchased-details">
+                            <div class="insight-detail">
+                                <div class="detail-label">Purchased</div>
+                                <div class="detail-value">{{ purchase.purchased_at|date:"M d, Y" }}</div>
+                            </div>
+                            <div class="insight-detail">
+                                <div class="detail-label">Type</div>
+                                <div class="detail-value">{{ purchase.analysis.get_analysis_type_display }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="purchased-price">${{ purchase.purchase_price }}</div>
+                        
+                        <a href="{% url 'view_analysis' purchase.analysis.id %}" class="btn btn-outline btn-w-full" style="margin-top: 1rem;">
+                            View Details
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📚</div>
+                    <h3>No analyses purchased</h3>
+                    <p>Start your crypto learning journey</p>
+                    <a href="{% url 'marketplace' %}" class="btn btn-primary">
+                        Browse Analyses
+                    </a>
+                </div>
+                {% endif %}
+            </section>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Recent Activity -->
+            <section class="recent-activity" style="margin-bottom: 2rem;">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-history"></i>
+                        Recent Activity
+                    </h2>
+                </div>
+
+                {% for transaction in recent_transactions %}
+                <div class="activity-item">
+                    <div class="activity-icon icon-{{ transaction.transaction_type }}">
+                        <i class="fas fa-{% if transaction.transaction_type == 'deposit' %}arrow-down{% elif transaction.transaction_type == 'withdrawal' %}arrow-up{% else %}shopping-cart{% endif %}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4 class="activity-title">{{ transaction.description|default:"Transaction" }}</h4>
+                        <p class="activity-description">{{ transaction.payment_method|title }}</p>
+                    </div>
+                    <div class="activity-time">
+                        {{ transaction.created_at|timesince }} ago
+                    </div>
+                </div>
+                {% empty %}
+                <div class="activity-item">
+                    <div class="activity-icon icon-deposit">
+                        <i class="fas fa-info"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4 class="activity-title">No recent activity</h4>
+                        <p class="activity-description">Transactions will appear here</p>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <a href="{% url 'transaction_history' %}" class="btn btn-outline btn-w-full" style="margin-top: 1rem;">
+                    View All Activity
+                </a>
+            </section>
+
+            <!-- Trading Tips -->
+            <section class="trading-tips">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-lightbulb"></i>
+                        Trading Tips
+                    </h2>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="tip-content">
+                        <h4 class="tip-title">Diversify Knowledge</h4>
+                        <p class="tip-description">Explore different analysis types</p>
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="tip-content">
+                        <h4 class="tip-title">Time Your Learning</h4>
+                        <p class="tip-description">Match with market cycles</p>
+                    </div>
+                </div>
+
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="tip-content">
+                        <h4 class="tip-title">Learn from Experts</h4>
+                        <p class="tip-description">Book consultation sessions</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Binance-style dashboard interactions
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard initialized');
+    
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.stat-item, .action-btn, .insight-card, .purchased-card, .consultation-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Consultation form validation
+    const consultationForms = document.querySelectorAll('.consultation-booking-form');
+    consultationForms.forEach(form => {
+        const dateInput = form.querySelector('input[type="datetime-local"]');
+        if (dateInput) {
+            // Set minimum date to current date/time
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            dateInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+    });
+    
+    // Simulate real-time updates
+    function updateStats() {
+        const statItems = document.querySelectorAll('.stat-item .stat-value');
+        statItems.forEach(item => {
+            const originalText = item.textContent;
+            item.style.opacity = '0.7';
+            setTimeout(() => {
+                item.style.opacity = '1';
+            }, 300);
+        });
+    }
+    
+    // Update every 30 seconds
+    setInterval(updateStats, 30000);
+});
+</script>
+{% endblock %}
