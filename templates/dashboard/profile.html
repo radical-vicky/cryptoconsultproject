@@ -1460,12 +1460,12 @@
                             <span class="stat-label">Balance</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-value">{{ analyses|length }}</span>
-                            <span class="stat-label">Analyses</span>
+                            <span class="stat-value">{{ user_wallet.mpesa_verified }}</span>
+                            <span class="stat-label">Verified</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-value">{{ verified|length }}</span>
-                            <span class="stat-label">Account Level</span>
+                            <!--<span class="stat-value">{{ verified|length }}</span>
+                            <span class="stat-label">Account Level</span>-->
                         </div>
                     </div>
                 </div>
@@ -1593,9 +1593,9 @@
                     <!-- Quick Actions -->
                     <h3 class="section-title" style="font-size: 1.25rem; margin-top: 2rem;">Quick Actions</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <a href="#" class="btn btn-outline">
+                        <a href="{% url 'marketplace' %}" class="btn btn-outline">
                             <i class="fas fa-store"></i>
-                            Browse Analyses
+                            Browse Marketplace
                         </a>
                         <a href="{% url 'wallet' %}" class="btn btn-outline">
                             <i class="fas fa-wallet"></i>
@@ -1605,9 +1605,9 @@
                             <i class="fas fa-shield-alt"></i>
                             Enable 2FA
                         </button>
-                        <a href="{% url 'portfolio' %}" class="btn btn-outline">
-                            <i class="fas fa-chart-pie"></i>
-                            View Portfolio
+                        <a href="{% url 'my_consultations' %}" class="btn btn-outline">
+                            <i class="fas fa-calendar-check"></i>
+                            Your Crypto-Consultations
                         </a>
                     </div>
                 </div>

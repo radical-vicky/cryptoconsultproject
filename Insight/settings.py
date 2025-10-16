@@ -105,6 +105,20 @@ DATABASES = {
 }
 
 
+#DATABASES = {
+   # 'default': {
+      #  'ENGINE': 'django.db.backends.postgresql',
+        #'NAME': 'insight_db',  # Your database name
+       # 'USER': 'root',     # Your PostgreSQL username
+       # 'PASSWORD': '', # Your PostgreSQL password
+       # 'HOST': 'localhost',    # Your database host
+      #  'PORT': '5432',         # Your database port
+    #}
+#}
+
+
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 

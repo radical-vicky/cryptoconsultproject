@@ -13,6 +13,9 @@
         <p style="color: #94a3b8; font-size: 1.125rem;">
             Manage your funds and transactions
         </p>
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 0.5rem; padding: 0.5rem 1rem; display: inline-block; margin-top: 0.5rem;">
+            <span style="color: #94a3b8; font-size: 0.875rem;">Exchange Rate: 1 USD = KES {{ exchange_rate }}</span>
+        </div>
     </div>
 
     <!-- Messages -->
@@ -39,21 +42,30 @@
             Balance Overview
         </h2>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
             <div style="text-align: center; padding: 1.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.3);">
                 <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
-                    Available Balance
+                    Available Balance (USD)
                 </div>
                 <div style="font-size: 2rem; font-weight: 700; color: #3b82f6;">
-                    ${{ user_wallet.balance|default:"0.00" }}
+                    ${{ user_wallet.balance|floatformat:2 }}
                 </div>
             </div>
             
             <div style="text-align: center; padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.3);">
                 <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
-                    Total Transactions
+                    Available Balance (KES)
                 </div>
                 <div style="font-size: 2rem; font-weight: 700; color: #10b981;">
+                    KES {{ balance_kes|floatformat:0 }}
+                </div>
+            </div>
+            
+            <div style="text-align: center; padding: 1.5rem; background: rgba(168, 85, 247, 0.1); border-radius: 0.75rem; border: 1px solid rgba(168, 85, 247, 0.3);">
+                <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;">
+                    Total Transactions
+                </div>
+                <div style="font-size: 2rem; font-weight: 700; color: #a855f7;">
                     {{ transactions|length }}
                 </div>
             </div>
@@ -96,17 +108,17 @@
         </h2>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-            <a href="{% url 'deposit' %}" 
+            <button onclick="showMpesaDepositModal()"
                style="padding: 1rem 1.5rem; background: #10b981; color: white; border: 2px solid #10b981; border-radius: 0.75rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                 <span></span>
-                Deposit Funds
-            </a>
+                Deposit via M-Pesa
+            </button>
             
-            <a href="{% url 'withdraw' %}" 
+            <button onclick="showMpesaWithdrawModal()"
                style="padding: 1rem 1.5rem; background: #3b82f6; color: white; border: 2px solid #3b82f6; border-radius: 0.75rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                 <span></span>
-                Withdraw Funds
-            </a>
+                Withdraw via M-Pesa
+            </button>
             
             <a href="{% url 'payment_methods' %}" 
                style="padding: 1rem 1.5rem; background: #8b5cf6; color: white; border: 2px solid #8b5cf6; border-radius: 0.75rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
@@ -119,6 +131,95 @@
                 <span></span>
                 View History
             </a>
+        </div>
+    </div>
+
+    <!-- M-Pesa Deposit Modal -->
+    <div id="mpesaDepositModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1e293b; border-radius: 0.75rem; padding: 2rem; width: 90%; max-width: 500px; border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.5rem; font-weight: 600; color: #ffffff;">Deposit via M-Pesa</h3>
+                <button onclick="closeMpesaDepositModal()" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            
+            <form id="mpesaDepositForm" method="POST" action="{% url 'initiate_mpesa_deposit' %}">
+                {% csrf_token %}
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: #94a3b8; margin-bottom: 0.5rem;">Amount (KES)</label>
+                    <input type="number" name="amount" min="1" step="1" required 
+                           placeholder="Enter amount in Kenyan Shillings"
+                           style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.5rem; color: #ffffff;">
+                    <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.25rem;">
+                        Equivalent to $<span id="depositUsdAmount">0.00</span> USD
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: #94a3b8; margin-bottom: 0.5rem;">M-Pesa Number</label>
+                    <input type="tel" name="phone_number" value="{{ user_wallet.mpesa_number }}" required 
+                           placeholder="e.g., 0712345678"
+                           style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.5rem; color: #ffffff;">
+                    <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.25rem;">
+                        Format: 07XXXXXXXX or 2547XXXXXXXX
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" onclick="closeMpesaDepositModal()" 
+                            style="flex: 1; padding: 0.75rem; background: transparent; color: #94a3b8; border: 1px solid #94a3b8; border-radius: 0.5rem; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            style="flex: 1; padding: 0.75rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                        Initiate Deposit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- M-Pesa Withdrawal Modal -->
+    <div id="mpesaWithdrawModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1e293b; border-radius: 0.75rem; padding: 2rem; width: 90%; max-width: 500px; border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.5rem; font-weight: 600; color: #ffffff;">Withdraw via M-Pesa</h3>
+                <button onclick="closeMpesaWithdrawModal()" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            
+            <form id="mpesaWithdrawForm" method="POST" action="{% url 'initiate_mpesa_withdrawal' %}">
+                {% csrf_token %}
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: #94a3b8; margin-bottom: 0.5rem;">Amount (KES)</label>
+                    <input type="number" name="amount" min="1" step="1" required 
+                           placeholder="Enter amount in Kenyan Shillings"
+                           max="{{ balance_kes|floatformat:0 }}"
+                           style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.5rem; color: #ffffff;">
+                    <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.25rem;">
+                        Equivalent to $<span id="withdrawUsdAmount">0.00</span> USD • Max: KES {{ balance_kes|floatformat:0 }}
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: #94a3b8; margin-bottom: 0.5rem;">M-Pesa Number</label>
+                    <input type="tel" name="phone_number" value="{{ user_wallet.mpesa_number }}" required 
+                           placeholder="e.g., 0712345678"
+                           style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.5rem; color: #ffffff;">
+                    <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.25rem;">
+                        Format: 07XXXXXXXX or 2547XXXXXXXX
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" onclick="closeMpesaWithdrawModal()" 
+                            style="flex: 1; padding: 0.75rem; background: transparent; color: #94a3b8; border: 1px solid #94a3b8; border-radius: 0.5rem; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            style="flex: 1; padding: 0.75rem; background: #3b82f6; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                        Initiate Withdrawal
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -156,7 +257,10 @@
                 </div>
                 <div style="text-align: right;">
                     <div style="color: {% if transaction.transaction_type == 'deposit' %}#10b981{% else %}#ef4444{% endif %}; font-weight: 700;">
-                        {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}${{ transaction.amount }}
+                        {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}${{ transaction.amount|floatformat:2 }}
+                    </div>
+                    <div style="color: #94a3b8; font-size: 0.875rem;">
+                        KES <span class="transaction-kes" data-amount="{{ transaction.amount }}">0</span>
                     </div>
                     <div style="color: 
                         {% if transaction.status == 'completed' %}#10b981
@@ -177,15 +281,152 @@
             <div style="font-size: 1.25rem; margin-bottom: 0.5rem;">No transactions yet</div>
             <div>Make your first deposit to get started!</div>
             <div style="margin-top: 1.5rem;">
-                <a href="{% url 'deposit' %}" 
+                <button onclick="showMpesaDepositModal()" 
                    style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer; text-decoration: none;">
                     Make First Deposit
-                </a>
+                </button>
             </div>
         </div>
         {% endif %}
     </div>
 </div>
+
+<script>
+// Modal functions
+function showMpesaDepositModal() {
+    document.getElementById('mpesaDepositModal').style.display = 'flex';
+    updateDepositUsdAmount();
+}
+
+function closeMpesaDepositModal() {
+    document.getElementById('mpesaDepositModal').style.display = 'none';
+}
+
+function showMpesaWithdrawModal() {
+    document.getElementById('mpesaWithdrawModal').style.display = 'flex';
+    updateWithdrawUsdAmount();
+}
+
+function closeMpesaWithdrawModal() {
+    document.getElementById('mpesaWithdrawModal').style.display = 'none';
+}
+
+// Currency conversion functions
+function updateDepositUsdAmount() {
+    const kesInput = document.querySelector('#mpesaDepositForm input[name="amount"]');
+    const usdDisplay = document.getElementById('depositUsdAmount');
+    
+    kesInput.addEventListener('input', function() {
+        const kesAmount = parseFloat(this.value) || 0;
+        const usdAmount = kesAmount / {{ exchange_rate }};
+        usdDisplay.textContent = usdAmount.toFixed(2);
+    });
+}
+
+function updateWithdrawUsdAmount() {
+    const kesInput = document.querySelector('#mpesaWithdrawForm input[name="amount"]');
+    const usdDisplay = document.getElementById('withdrawUsdAmount');
+    
+    kesInput.addEventListener('input', function() {
+        const kesAmount = parseFloat(this.value) || 0;
+        const usdAmount = kesAmount / {{ exchange_rate }};
+        usdDisplay.textContent = usdAmount.toFixed(2);
+    });
+}
+
+// Calculate KES amounts for transactions
+function calculateTransactionKES() {
+    const exchangeRate = {{ exchange_rate }};
+    const kesElements = document.querySelectorAll('.transaction-kes');
+    
+    kesElements.forEach(element => {
+        const usdAmount = parseFloat(element.getAttribute('data-amount')) || 0;
+        const kesAmount = usdAmount * exchangeRate;
+        element.textContent = Math.round(kesAmount);
+    });
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const depositModal = document.getElementById('mpesaDepositModal');
+    const withdrawModal = document.getElementById('mpesaWithdrawModal');
+    
+    if (event.target === depositModal) {
+        closeMpesaDepositModal();
+    }
+    if (event.target === withdrawModal) {
+        closeMpesaWithdrawModal();
+    }
+}
+
+// Form submission handling
+document.getElementById('mpesaDepositForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const amountInput = this.querySelector('input[name="amount"]');
+    const phoneInput = this.querySelector('input[name="phone_number"]');
+    
+    // Validate amount
+    if (parseFloat(amountInput.value) < 1) {
+        alert('Please enter an amount greater than 0 KES');
+        return;
+    }
+    
+    // Validate phone number
+    if (!phoneInput.value.trim()) {
+        alert('Please enter your M-Pesa number');
+        return;
+    }
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = 'Processing...';
+    submitBtn.disabled = true;
+    
+    // Submit form
+    this.submit();
+});
+
+document.getElementById('mpesaWithdrawForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const amountInput = this.querySelector('input[name="amount"]');
+    const phoneInput = this.querySelector('input[name="phone_number"]');
+    
+    // Validate amount
+    const amount = parseFloat(amountInput.value);
+    if (amount < 1) {
+        alert('Please enter an amount greater than 0 KES');
+        return;
+    }
+    
+    // Check if amount exceeds balance
+    const maxAmount = parseFloat('{{ balance_kes }}');
+    if (amount > maxAmount) {
+        alert('Withdrawal amount exceeds your available balance');
+        return;
+    }
+    
+    // Validate phone number
+    if (!phoneInput.value.trim()) {
+        alert('Please enter your M-Pesa number');
+        return;
+    }
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = 'Processing...';
+    submitBtn.disabled = true;
+    
+    // Submit form
+    this.submit();
+});
+
+// Initialize currency conversion on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateDepositUsdAmount();
+    updateWithdrawUsdAmount();
+    calculateTransactionKES();
+});
+</script>
 
 <style>
 /* Your existing styles */
@@ -199,12 +440,12 @@ a:hover {
     color: white !important;
 }
 
-a[href*="deposit"]:hover {
+button[onclick*="Deposit"]:hover {
     background: #10b981 !important;
     border-color: #10b981 !important;
 }
 
-a[href*="withdraw"]:hover {
+button[onclick*="Withdraw"]:hover {
     background: #3b82f6 !important;
     border-color: #3b82f6 !important;
 }
@@ -231,7 +472,7 @@ input:focus, textarea:focus, select:focus {
         padding: 0 1rem;
     }
     
-    div[style*="grid-template-columns: 1fr 1fr"] {
+    div[style*="grid-template-columns: 1fr 1fr 1fr"] {
         grid-template-columns: 1fr !important;
     }
     

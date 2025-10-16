@@ -72,14 +72,14 @@
                     <!-- M-Pesa Option -->
                     <div>
                         <input type="radio" 
-                               name="preferred_method" 
+                               name="preferred_payment_method" 
                                id="preferred_method_mpesa"
                                value="mpesa" 
-                               {% if form.preferred_method.value == 'mpesa' or not form.preferred_method.value and user_wallet.preferred_method == 'mpesa' %}checked{% endif %}
+                               {% if form.preferred_payment_method.value == 'mpesa' or not form.preferred_payment_method.value and user_wallet.preferred_payment_method == 'mpesa' %}checked{% endif %}
                                style="display: none;">
                         <label for="preferred_method_mpesa" style="display: block; cursor: pointer; margin: 0;">
-                            <div style="padding: 1.5rem; background: {% if form.preferred_method.value == 'mpesa' or not form.preferred_method.value and user_wallet.preferred_method == 'mpesa' %}rgba(0, 179, 0, 0.1){% else %}rgba(255, 255, 255, 0.05){% endif %}; 
-                                    border: 2px solid {% if form.preferred_method.value == 'mpesa' or not form.preferred_method.value and user_wallet.preferred_method == 'mpesa' %}#00B300{% else %}rgba(255, 255, 255, 0.2){% endif %}; 
+                            <div style="padding: 1.5rem; background: {% if form.preferred_payment_method.value == 'mpesa' or not form.preferred_payment_method.value and user_wallet.preferred_payment_method == 'mpesa' %}rgba(0, 179, 0, 0.1){% else %}rgba(255, 255, 255, 0.05){% endif %}; 
+                                    border: 2px solid {% if form.preferred_payment_method.value == 'mpesa' or not form.preferred_payment_method.value and user_wallet.preferred_payment_method == 'mpesa' %}#00B300{% else %}rgba(255, 255, 255, 0.2){% endif %}; 
                                     border-radius: 0.75rem; text-align: center; transition: all 0.3s ease; height: 100%;">
                                 <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #00B300, #008000); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
                                     <span style="color: white; font-weight: bold; font-size: 1.2rem;">M</span>
@@ -93,14 +93,14 @@
                     <!-- PayPal Option -->
                     <div>
                         <input type="radio" 
-                               name="preferred_method" 
+                               name="preferred_payment_method" 
                                id="preferred_method_paypal"
                                value="paypal" 
-                               {% if form.preferred_method.value == 'paypal' or not form.preferred_method.value and user_wallet.preferred_method == 'paypal' %}checked{% endif %}
+                               {% if form.preferred_payment_method.value == 'paypal' or not form.preferred_payment_method.value and user_wallet.preferred_payment_method == 'paypal' %}checked{% endif %}
                                style="display: none;">
                         <label for="preferred_method_paypal" style="display: block; cursor: pointer; margin: 0;">
-                            <div style="padding: 1.5rem; background: {% if form.preferred_method.value == 'paypal' or not form.preferred_method.value and user_wallet.preferred_method == 'paypal' %}rgba(0, 112, 186, 0.1){% else %}rgba(255, 255, 255, 0.05){% endif %}; 
-                                    border: 2px solid {% if form.preferred_method.value == 'paypal' or not form.preferred_method.value and user_wallet.preferred_method == 'paypal' %}#0070BA{% else %}rgba(255, 255, 255, 0.2){% endif %}; 
+                            <div style="padding: 1.5rem; background: {% if form.preferred_payment_method.value == 'paypal' or not form.preferred_payment_method.value and user_wallet.preferred_payment_method == 'paypal' %}rgba(0, 112, 186, 0.1){% else %}rgba(255, 255, 255, 0.05){% endif %}; 
+                                    border: 2px solid {% if form.preferred_payment_method.value == 'paypal' or not form.preferred_payment_method.value and user_wallet.preferred_payment_method == 'paypal' %}#0070BA{% else %}rgba(255, 255, 255, 0.2){% endif %}; 
                                     border-radius: 0.75rem; text-align: center; transition: all 0.3s ease; height: 100%;">
                                 <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #0070BA, #1546A0); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
                                     <span style="color: white; font-weight: bold; font-size: 1.2rem;">P</span>
@@ -112,9 +112,9 @@
                     </div>
                 </div>
 
-                {% if form.preferred_method.errors %}
+                {% if form.preferred_payment_method.errors %}
                 <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;">
-                    {% for error in form.preferred_method.errors %}
+                    {% for error in form.preferred_payment_method.errors %}
                         {{ error }}
                     {% endfor %}
                 </div>
@@ -144,7 +144,7 @@
                     <input type="text" 
                            name="mpesa_number" 
                            id="id_mpesa_number"
-                           placeholder="+254712345678"
+                           placeholder="0712345678"
                            value="{{ form.mpesa_number.value|default:user_wallet.mpesa_number|default:'' }}"
                            style="width: 100%; padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid {% if form.mpesa_number.errors %}#ef4444{% else %}rgba(255, 255, 255, 0.2){% endif %}; border-radius: 0.5rem; color: #ffffff; transition: all 0.3s ease;">
                     {% if form.mpesa_number.errors %}
@@ -155,9 +155,35 @@
                     </div>
                     {% endif %}
                     <div style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.5rem;">
-                        Enter your M-Pesa registered phone number with country code
+                        Enter your M-Pesa registered phone number (e.g., 0712345678)
                     </div>
                 </div>
+
+                <!-- M-Pesa Verification Status -->
+                {% if user_wallet.mpesa_number %}
+                <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="color: {% if user_wallet.mpesa_verified %}#10b981{% else %}#f59e0b{% endif %};">
+                            {% if user_wallet.mpesa_verified %}✓{% else %}!{% endif %}
+                        </span>
+                        <span style="color: #ffffff; font-weight: 500;">
+                            M-Pesa Status: 
+                            {% if user_wallet.mpesa_verified %}
+                                <span style="color: #10b981;">Verified</span>
+                            {% else %}
+                                <span style="color: #f59e0b;">Pending Verification</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div style="color: #94a3b8; font-size: 0.875rem;">
+                        {% if user_wallet.mpesa_verified %}
+                            Your M-Pesa number is verified and ready for transactions
+                        {% else %}
+                            Complete a deposit to verify your M-Pesa number
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
 
             <!-- PayPal Section -->
@@ -197,6 +223,32 @@
                         Enter the email address associated with your PayPal account
                     </div>
                 </div>
+
+                <!-- PayPal Verification Status -->
+                {% if user_wallet.paypal_email %}
+                <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="color: {% if user_wallet.paypal_verified %}#10b981{% else %}#f59e0b{% endif %};">
+                            {% if user_wallet.paypal_verified %}✓{% else %}!{% endif %}
+                        </span>
+                        <span style="color: #ffffff; font-weight: 500;">
+                            PayPal Status: 
+                            {% if user_wallet.paypal_verified %}
+                                <span style="color: #10b981;">Verified</span>
+                            {% else %}
+                                <span style="color: #f59e0b;">Pending Verification</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div style="color: #94a3b8; font-size: 0.875rem;">
+                        {% if user_wallet.paypal_verified %}
+                            Your PayPal email is verified and ready for transactions
+                        {% else %}
+                            Complete a deposit to verify your PayPal email
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
 
             <!-- Action Buttons -->
@@ -234,7 +286,7 @@
                     </div>
                     <div>
                         <div style="color: #ffffff; font-weight: 500;">
-                            {{ transaction.description }}
+                            {{ transaction.description|truncatechars:30 }}
                         </div>
                         <div style="color: #94a3b8; font-size: 0.875rem;">
                             {{ transaction.created_at|date:"M j, Y g:i A" }} • {{ transaction.payment_method|title }}
@@ -246,7 +298,13 @@
                         {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}${{ transaction.amount }}
                     </div>
                     <div style="color: #94a3b8; font-size: 0.875rem; text-transform: capitalize;">
-                        {{ transaction.status }}
+                        <span style="color: 
+                            {% if transaction.status == 'completed' %}#10b981
+                            {% elif transaction.status == 'pending' %}#f59e0b
+                            {% elif transaction.status == 'failed' %}#ef4444
+                            {% else %}#94a3b8{% endif %}">
+                            {{ transaction.status }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -256,6 +314,21 @@
         <div style="text-align: center; padding: 2rem; color: #94a3b8;">
             <div style="font-size: 3rem; margin-bottom: 1rem;">💳</div>
             <div>No transactions yet</div>
+            <div style="font-size: 0.875rem; margin-top: 0.5rem;">
+                <a href="{% url 'deposit' %}" style="color: #3b82f6; text-decoration: none;">
+                    Make your first deposit →
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if transactions %}
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <a href="{% url 'transaction_history' %}" 
+               style="color: #3b82f6; text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                View all transactions
+                <i class="fas fa-arrow-right"></i>
+            </a>
         </div>
         {% endif %}
     </div>
@@ -307,6 +380,19 @@ input[type="radio"]:checked + label > div {
     background: rgba(0, 112, 186, 0.1) !important;
 }
 
+/* Status indicator styles */
+.status-verified {
+    color: #10b981;
+}
+
+.status-pending {
+    color: #f59e0b;
+}
+
+.status-failed {
+    color: #ef4444;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 0 1rem;
@@ -337,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
         paypalCard.style.background = 'rgba(255, 255, 255, 0.05)';
         
         // Apply active styles based on checked radio
-        const checkedRadio = document.querySelector('input[name="preferred_method"]:checked');
+        const checkedRadio = document.querySelector('input[name="preferred_payment_method"]:checked');
         if (checkedRadio) {
             if (checkedRadio.value === 'mpesa') {
                 mpesaCard.style.borderColor = '#00B300';
@@ -350,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Add click event listeners to both cards
-    document.querySelectorAll('input[name="preferred_method"]').forEach(radio => {
+    document.querySelectorAll('input[name="preferred_payment_method"]').forEach(radio => {
         radio.addEventListener('change', updateSelection);
     });
     
@@ -368,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form validation - ensure a payment method is selected before submit
     const form = document.querySelector('form');
     form.addEventListener('submit', function(e) {
-        const preferredMethod = document.querySelector('input[name="preferred_method"]:checked');
+        const preferredMethod = document.querySelector('input[name="preferred_payment_method"]:checked');
         if (!preferredMethod) {
             e.preventDefault();
             // Show error message
@@ -388,6 +474,29 @@ document.addEventListener('DOMContentLoaded', function() {
             errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     });
+
+    // Phone number formatting for M-Pesa
+    const mpesaInput = document.getElementById('id_mpesa_number');
+    if (mpesaInput) {
+        mpesaInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            // Remove leading 0 if present and add 254
+            if (value.startsWith('0')) {
+                value = '254' + value.substring(1);
+            }
+            // If it starts with 7 and is 9 digits, add 254
+            else if (value.startsWith('7') && value.length === 9) {
+                value = '254' + value;
+            }
+            // If it starts with 254 and is 12 digits, keep it
+            else if (value.startsWith('254') && value.length === 12) {
+                // Already formatted correctly
+            }
+            
+            e.target.value = value;
+        });
+    }
 });
 </script>
 {% endblock %}

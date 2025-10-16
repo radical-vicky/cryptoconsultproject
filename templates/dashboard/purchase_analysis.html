@@ -36,9 +36,21 @@
 .balance-overview {
     background: #1e2329;
     border: 1px solid #2b3139;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 2rem;
     margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.balance-overview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #f0b90b, #03a66d);
 }
 
 .balance-grid {
@@ -51,21 +63,24 @@
 .balance-card {
     background: #2b3139;
     border: 1px solid #3c4450;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 1.5rem;
     text-align: center;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .balance-card:hover {
     border-color: #f0b90b;
     background: #2b3139;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(240, 185, 11, 0.1);
 }
 
 .balance-value {
     font-size: 2rem;
     font-weight: 700;
-    color: #eaecef;
     margin-bottom: 0.5rem;
 }
 
@@ -77,10 +92,27 @@
     color: #03a66d;
 }
 
+.balance-value.locked {
+    color: #848e9c;
+}
+
 .balance-label {
     color: #848e9c;
     font-size: 0.85rem;
     font-weight: 500;
+}
+
+.balance-change {
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.change-positive {
+    color: #03a66d;
+}
+
+.change-negative {
+    color: #cf304a;
 }
 
 /* Payment Methods */
@@ -109,18 +141,26 @@
     padding: 1rem;
     background: #2b3139;
     border: 1px solid #3c4450;
-    border-radius: 4px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.payment-method:hover {
+    border-color: #f0b90b;
+    transform: translateY(-1px);
 }
 
 .payment-icon {
     width: 40px;
     height: 40px;
-    border-radius: 4px;
+    border-radius: 6px;
     background: #3c4450;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #eaecef;
+    font-size: 1.2rem;
 }
 
 .payment-details {
@@ -136,7 +176,6 @@
 
 .payment-status {
     font-size: 0.75rem;
-    color: #848e9c;
 }
 
 .status-active {
@@ -151,7 +190,7 @@
 .quick-actions {
     background: #1e2329;
     border: 1px solid #2b3139;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 2rem;
     margin-bottom: 2rem;
 }
@@ -172,7 +211,7 @@
 .action-btn {
     padding: 1rem 1.5rem;
     border: 1px solid #3c4450;
-    border-radius: 4px;
+    border-radius: 8px;
     background: #2b3139;
     color: #eaecef;
     text-decoration: none;
@@ -180,8 +219,9 @@
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     font-weight: 500;
+    text-align: center;
 }
 
 .action-btn:hover {
@@ -189,6 +229,8 @@
     background: #2b3139;
     text-decoration: none;
     color: #eaecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(240, 185, 11, 0.1);
 }
 
 .action-btn.deposit {
@@ -231,11 +273,21 @@
     color: #ffffff;
 }
 
+.action-btn.transfer {
+    border-color: #10b981;
+    color: #10b981;
+}
+
+.action-btn.transfer:hover {
+    background: #10b981;
+    color: #ffffff;
+}
+
 /* Recent Transactions */
 .recent-transactions {
     background: #1e2329;
     border: 1px solid #2b3139;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 2rem;
 }
 
@@ -258,16 +310,17 @@
     background: transparent;
     color: #f0b90b;
     border: 1px solid #f0b90b;
-    border-radius: 4px;
+    border-radius: 6px;
     text-decoration: none;
     font-size: 0.85rem;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .view-all-btn:hover {
     background: #f0b90b;
     color: #000000;
     text-decoration: none;
+    transform: translateY(-1px);
 }
 
 /* Transaction List */
@@ -284,13 +337,14 @@
     padding: 1rem;
     background: #2b3139;
     border: 1px solid #3c4450;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
 .transaction-item:hover {
     border-color: #f0b90b;
     background: #2b3139;
+    transform: translateX(4px);
 }
 
 .transaction-info {
@@ -302,12 +356,13 @@
 .transaction-icon {
     width: 40px;
     height: 40px;
-    border-radius: 4px;
+    border-radius: 8px;
     background: #3c4450;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
+    transition: all 0.3s ease;
 }
 
 .transaction-icon.deposit {
@@ -318,6 +373,16 @@
 .transaction-icon.withdraw {
     background: rgba(207, 48, 74, 0.2);
     color: #cf304a;
+}
+
+.transaction-icon.purchase {
+    background: rgba(240, 185, 11, 0.2);
+    color: #f0b90b;
+}
+
+.transaction-icon.transfer {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
 }
 
 .transaction-details {
@@ -353,21 +418,36 @@
     color: #cf304a;
 }
 
+.amount-value.purchase {
+    color: #f0b90b;
+}
+
 .transaction-status {
     font-size: 0.75rem;
     text-transform: capitalize;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
 }
 
 .status-completed {
+    background: rgba(3, 166, 109, 0.2);
     color: #03a66d;
 }
 
 .status-pending {
+    background: rgba(240, 185, 11, 0.2);
     color: #f0b90b;
 }
 
 .status-failed {
+    background: rgba(207, 48, 74, 0.2);
     color: #cf304a;
+}
+
+.status-processing {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
 }
 
 /* Empty State */
@@ -395,6 +475,73 @@
     margin-bottom: 1.5rem;
 }
 
+/* Stats Cards */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #eaecef;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #848e9c;
+    font-size: 0.85rem;
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(240, 185, 11, 0.3);
+    border-radius: 50%;
+    border-top-color: #f0b90b;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Refresh Button */
+.refresh-btn {
+    background: transparent;
+    border: 1px solid #3c4450;
+    color: #848e9c;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.refresh-btn:hover {
+    border-color: #f0b90b;
+    color: #f0b90b;
+}
+
+.refresh-btn.loading {
+    border-color: #f0b90b;
+    color: #f0b90b;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .wallet-container {
@@ -414,6 +561,10 @@
         grid-template-columns: 1fr;
     }
     
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
     .transaction-item {
         flex-direction: column;
         align-items: flex-start;
@@ -423,6 +574,9 @@
     .transaction-amount {
         text-align: left;
         width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 }
 
@@ -433,6 +587,51 @@
     
     .action-btn {
         padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    max-width: 300px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification.success {
+    background: rgba(3, 166, 109, 0.9);
+    color: #000000;
+}
+
+.notification.error {
+    background: rgba(207, 48, 74, 0.9);
+    color: #ffffff;
+}
+
+.notification.info {
+    background: rgba(240, 185, 11, 0.9);
+    color: #000000;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
     }
 }
 </style>
@@ -440,15 +639,23 @@
 <div class="wallet-container">
     <!-- Header Section -->
     <div class="wallet-header">
-        <h1 class="wallet-title">Wallet</h1>
-        <p class="wallet-subtitle">Manage your funds and transactions</p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 class="wallet-title">Wallet</h1>
+                <p class="wallet-subtitle">Manage your funds and transactions</p>
+            </div>
+            <button id="refreshBtn" class="refresh-btn" onclick="refreshWallet()">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+            </button>
+        </div>
     </div>
 
     <!-- Messages -->
     {% if messages %}
     <div style="margin-bottom: 2rem;">
         {% for message in messages %}
-        <div style="padding: 1rem; border-radius: 4px; margin-bottom: 0.5rem;
+        <div style="padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;
             {% if message.tags == 'success' %}
                 background: rgba(3, 166, 109, 0.1); border: 1px solid rgba(3, 166, 109, 0.3); color: #03a66d;
             {% elif message.tags == 'error' %}
@@ -456,11 +663,34 @@
             {% else %}
                 background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #3b82f6;
             {% endif %}">
-            {{ message }}
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                {{ message }}
+            </div>
         </div>
         {% endfor %}
     </div>
     {% endif %}
+
+    <!-- Stats Overview -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-value" style="color: #03a66d;">{{ total_deposits|default:"0" }}</div>
+            <div class="stat-label">Total Deposits</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: #cf304a;">{{ total_withdrawals|default:"0" }}</div>
+            <div class="stat-label">Total Withdrawals</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: #f0b90b;">{{ total_purchases|default:"0" }}</div>
+            <div class="stat-label">Analysis Purchases</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: #3b82f6;">{{ transactions|length }}</div>
+            <div class="stat-label">Total Transactions</div>
+        </div>
+    </div>
 
     <!-- Balance Overview -->
     <div class="balance-overview">
@@ -472,11 +702,19 @@
             <div class="balance-card">
                 <div class="balance-value available">${{ user_wallet.balance|default:"0.00" }}</div>
                 <div class="balance-label">Available Balance</div>
+                <div class="balance-change change-positive">+${{ weekly_change|default:"0.00" }} this week</div>
             </div>
             
             <div class="balance-card">
-                <div class="balance-value total">{{ transactions|length }}</div>
-                <div class="balance-label">Total Transactions</div>
+                <div class="balance-value total">${{ total_balance|default:"0.00" }}</div>
+                <div class="balance-label">Total Balance</div>
+                <div class="balance-change change-positive">All accounts</div>
+            </div>
+            
+            <div class="balance-card">
+                <div class="balance-value locked">${{ locked_balance|default:"0.00" }}</div>
+                <div class="balance-label">Locked Funds</div>
+                <div class="balance-change">In active trades</div>
             </div>
         </div>
 
@@ -484,8 +722,8 @@
         <div class="payment-methods">
             <h3 class="payment-methods-title">Payment Methods Status</h3>
             <div class="payment-methods-grid">
-                <div class="payment-method">
-                    <div class="payment-icon">
+                <div class="payment-method" onclick="setupPaymentMethod('mpesa')">
+                    <div class="payment-icon" style="background: rgba(1, 122, 255, 0.2); color: #017AFF;">
                         <i class="fas fa-mobile-alt"></i>
                     </div>
                     <div class="payment-details">
@@ -494,10 +732,11 @@
                             {% if user_wallet.mpesa_number %}{{ user_wallet.mpesa_number }}{% else %}Not configured{% endif %}
                         </div>
                     </div>
+                    <i class="fas fa-chevron-right" style="color: #848e9c;"></i>
                 </div>
                 
-                <div class="payment-method">
-                    <div class="payment-icon">
+                <div class="payment-method" onclick="setupPaymentMethod('paypal')">
+                    <div class="payment-icon" style="background: rgba(0, 48, 135, 0.2); color: #003087;">
                         <i class="fab fa-paypal"></i>
                     </div>
                     <div class="payment-details">
@@ -506,6 +745,33 @@
                             {% if user_wallet.paypal_email %}{{ user_wallet.paypal_email }}{% else %}Not configured{% endif %}
                         </div>
                     </div>
+                    <i class="fas fa-chevron-right" style="color: #848e9c;"></i>
+                </div>
+                
+                <div class="payment-method" onclick="setupPaymentMethod('card')">
+                    <div class="payment-icon" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="payment-details">
+                        <div class="payment-name">Credit/Debit Card</div>
+                        <div class="payment-status status-inactive">
+                            Add payment card
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: #848e9c;"></i>
+                </div>
+                
+                <div class="payment-method" onclick="setupPaymentMethod('bank')">
+                    <div class="payment-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="payment-details">
+                        <div class="payment-name">Bank Transfer</div>
+                        <div class="payment-status status-inactive">
+                            Setup bank account
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: #848e9c;"></i>
                 </div>
             </div>
             
@@ -544,6 +810,16 @@
                 <i class="fas fa-history"></i>
                 View History
             </a>
+            
+            <button class="action-btn transfer" onclick="showTransferModal()">
+                <i class="fas fa-exchange-alt"></i>
+                Transfer Funds
+            </button>
+            
+            <a href="{% url 'marketplace' %}" class="action-btn" style="border-color: #8b5cf6; color: #8b5cf6;">
+                <i class="fas fa-shopping-cart"></i>
+                Buy Analysis
+            </a>
         </div>
     </div>
 
@@ -551,21 +827,33 @@
     <div class="recent-transactions">
         <div class="transactions-header">
             <h2 class="transactions-title">Recent Transactions</h2>
-            <a href="{% url 'transaction_history' %}" class="view-all-btn">
-                View All
-            </a>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <select id="transactionFilter" onchange="filterTransactions()" style="background: #2b3139; border: 1px solid #3c4450; color: #eaecef; padding: 0.5rem; border-radius: 6px; font-size: 0.85rem;">
+                    <option value="all">All Transactions</option>
+                    <option value="deposit">Deposits</option>
+                    <option value="withdraw">Withdrawals</option>
+                    <option value="purchase">Purchases</option>
+                </select>
+                <a href="{% url 'transaction_history' %}" class="view-all-btn">
+                    View All
+                </a>
+            </div>
         </div>
         
         {% if transactions %}
-        <div class="transaction-list">
+        <div class="transaction-list" id="transactionList">
             {% for transaction in transactions %}
-            <div class="transaction-item">
+            <div class="transaction-item" data-type="{{ transaction.transaction_type }}">
                 <div class="transaction-info">
                     <div class="transaction-icon {{ transaction.transaction_type }}">
                         {% if transaction.transaction_type == 'deposit' %}
                             <i class="fas fa-arrow-down"></i>
-                        {% else %}
+                        {% elif transaction.transaction_type == 'withdraw' %}
                             <i class="fas fa-arrow-up"></i>
+                        {% elif transaction.transaction_type == 'purchase' %}
+                            <i class="fas fa-shopping-cart"></i>
+                        {% else %}
+                            <i class="fas fa-exchange-alt"></i>
                         {% endif %}
                     </div>
                     <div class="transaction-details">
@@ -573,13 +861,15 @@
                             {{ transaction.description }}
                         </div>
                         <div class="transaction-meta">
-                            {{ transaction.created_at|date:"M j, Y g:i A" }} • {{ transaction.payment_method|title }}
+                            {{ transaction.created_at|date:"M j, Y g:i A" }} • 
+                            {{ transaction.payment_method|title }} • 
+                            ID: {{ transaction.id }}
                         </div>
                     </div>
                 </div>
                 <div class="transaction-amount">
                     <div class="amount-value {{ transaction.transaction_type }}">
-                        {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}${{ transaction.amount }}
+                        {% if transaction.transaction_type == 'deposit' %}+{% elif transaction.transaction_type == 'withdraw' %}-{% else %}-{% endif %}${{ transaction.amount }}
                     </div>
                     <div class="transaction-status status-{{ transaction.status }}">
                         {{ transaction.status }}
@@ -591,13 +881,17 @@
         
         {% else %}
         <div class="empty-state">
-            <div class="empty-state-icon">💳</div>
+            <div class="empty-state-icon"></div>
             <h3>No transactions yet</h3>
-            <p>Make your first deposit to get started!</p>
-            <div style="margin-top: 1.5rem;">
+            <p>Make your first deposit to get started with crypto analysis!</p>
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
                 <a href="{% url 'deposit' %}" class="action-btn deposit" style="display: inline-flex; width: auto;">
                     <i class="fas fa-arrow-down"></i>
                     Make First Deposit
+                </a>
+                <a href="{% url 'marketplace' %}" class="action-btn" style="display: inline-flex; width: auto; border-color: #8b5cf6; color: #8b5cf6;">
+                    <i class="fas fa-chart-line"></i>
+                    Browse Analyses
                 </a>
             </div>
         </div>
@@ -605,13 +899,124 @@
     </div>
 </div>
 
+<!-- Transfer Modal -->
+<div id="transferModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: #1e2329; border: 1px solid #2b3139; border-radius: 8px; padding: 2rem; max-width: 400px; width: 90%;">
+        <h3 style="color: #eaecef; margin-bottom: 1rem;">Transfer Funds</h3>
+        <p style="color: #848e9c; margin-bottom: 1.5rem;">Transfer funds between your accounts (coming soon)</p>
+        <button onclick="hideTransferModal()" class="action-btn" style="width: 100%;">
+            Close
+        </button>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Wallet page initialized');
     
-    // Add any wallet-specific JavaScript here
-    // For example: real-time balance updates, transaction filtering, etc.
+    // Initialize any wallet-specific functionality
+    initializeWallet();
+});
+
+function initializeWallet() {
+    // Add any initialization code here
+    console.log('Wallet functionality initialized');
+}
+
+function refreshWallet() {
+    const refreshBtn = document.getElementById('refreshBtn');
+    const icon = refreshBtn.querySelector('i');
+    
+    // Show loading state
+    refreshBtn.classList.add('loading');
+    icon.className = 'fas fa-spinner fa-spin';
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Remove loading state
+        refreshBtn.classList.remove('loading');
+        icon.className = 'fas fa-sync-alt';
+        
+        // Show success notification
+        showNotification('Wallet data refreshed successfully!', 'success');
+        
+        // In a real implementation, this would update the data from the server
+        console.log('Wallet data refreshed');
+    }, 1500);
+}
+
+function filterTransactions() {
+    const filter = document.getElementById('transactionFilter').value;
+    const transactions = document.querySelectorAll('.transaction-item');
+    
+    transactions.forEach(transaction => {
+        if (filter === 'all' || transaction.dataset.type === filter) {
+            transaction.style.display = 'flex';
+        } else {
+            transaction.style.display = 'none';
+        }
+    });
+}
+
+function setupPaymentMethod(method) {
+    // Redirect to payment method setup page
+    window.location.href = `/wallet/payment-methods/?method=${method}`;
+}
+
+function showTransferModal() {
+    document.getElementById('transferModal').style.display = 'flex';
+}
+
+function hideTransferModal() {
+    document.getElementById('transferModal').style.display = 'none';
+}
+
+function showNotification(message, type) {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => notification.remove());
+    
+    // Create new notification
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+
+// Auto-refresh wallet data every 30 seconds
+setInterval(() => {
+    console.log('Auto-refreshing wallet data...');
+    // In a real implementation, this would fetch updated data from the server
+}, 30000);
+
+// Handle page visibility changes
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        // Page became visible, refresh data
+        refreshWallet();
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl+R or Cmd+R to refresh
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        refreshWallet();
+    }
+    
+    // Escape key to close modals
+    if (e.key === 'Escape') {
+        hideTransferModal();
+    }
 });
 </script>
-
 {% endblock %}

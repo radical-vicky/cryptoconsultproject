@@ -6,6 +6,23 @@
 {% block content %}
 
 <style>
+:root {
+    --binance-yellow: #F0B90B;
+    --binance-green: #03A66D;
+    --binance-red: #CF304A;
+    --binance-blue: #017AFF;
+    --binance-dark: #1E2026;
+    --binance-card: #2B3139;
+    --binance-border: #474D57;
+    --binance-hover: #3A3F47;
+    --text-primary: #EAECEF;
+    --text-secondary: #B7BDC6;
+    --text-muted: #848E9C;
+    --accent-orange: #F0B90B;
+    --accent-purple: #7367F0;
+    --transition: all 0.3s ease;
+}
+
 /* Portfolio Container */
 .portfolio-container {
     max-width: 1400px;
@@ -716,43 +733,43 @@ html {
     scroll-padding-top: 80px;
 }
 </style>
- 
+
 <div class="portfolio-container">
     <!-- Stats Overview -->
     <div class="stats-overview">
         <div class="stat-card">
-            <div class="stat-value">${{ total_investment|default:"0.00" }}</div>
+            <div class="stat-value">${{ total_investment|floatformat:2|default:"0.00" }}</div>
             <div class="stat-label">Total Investment</div>
-            <div class="stat-change change-positive">
-                <i class="fas fa-arrow-up"></i>
-                15.3% overall return
+            <div class="stat-change {% if total_investment > 0 %}change-positive{% else %}change-negative{% endif %}">
+                <i class="fas fa-arrow-{% if total_investment > 0 %}up{% else %}down{% endif %}"></i>
+                ${{ total_investment|floatformat:2|default:"0.00" }} total
             </div>
         </div>
         
         <div class="stat-card">
-            <div class="stat-value">{{ purchased_analyses|length }}</div>
+            <div class="stat-value">{{ purchased_analyses.count|default:0 }}</div>
             <div class="stat-label">Analyses Owned</div>
             <div class="stat-change change-positive">
                 <i class="fas fa-arrow-up"></i>
-                3 new this month
+                {{ active_analyses|default:0 }} active
             </div>
         </div>
         
         <div class="stat-card">
-            <div class="stat-value">87%</div>
-            <div class="stat-label">Success Rate</div>
-            <div class="stat-change change-positive">
-                <i class="fas fa-arrow-up"></i>
-                5% from last month
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-value">4.2/5.0</div>
+            <div class="stat-value">{{ average_rating|floatformat:1|default:"0.0" }}/5.0</div>
             <div class="stat-label">Average Rating</div>
+            <div class="stat-change {% if average_rating >= 4.0 %}change-positive{% else %}change-negative{% endif %}">
+                <i class="fas fa-arrow-{% if average_rating >= 4.0 %}up{% else %}down{% endif %}"></i>
+                {{ average_rating|floatformat:1|default:"0.0" }} average
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value">{{ completed_analyses|default:0 }}</div>
+            <div class="stat-label">Completed</div>
             <div class="stat-change change-positive">
-                <i class="fas fa-arrow-up"></i>
-                0.3 improvement
+                <i class="fas fa-check-circle"></i>
+                {{ completed_analyses|default:0 }} analyses
             </div>
         </div>
     </div>
@@ -766,13 +783,13 @@ html {
                 <div class="section-header">
                     <h2 class="section-title">Portfolio Performance</h2>
                     <div class="section-actions">
-                        <select class="form-select">
-                            <option>Last 30 Days</option>
-                            <option>Last 90 Days</option>
-                            <option>Last Year</option>
-                            <option>All Time</option>
+                        <select class="form-select" id="timePeriod">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30" selected>Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                            <option value="365">Last Year</option>
                         </select>
-                        <button class="btn btn-primary">
+                        <button class="btn btn-primary" id="exportReport">
                             <i class="fas fa-download"></i>
                             Export Report
                         </button>
@@ -783,28 +800,31 @@ html {
                 <div class="chart-container">
                     <div class="placeholder-chart">
                         <i class="fas fa-chart-line"></i>
-                        <h3>Performance Chart</h3>
-                        <p>Interactive chart showing your investment growth over time</p>
+                        <h3>Portfolio Value: ${{ total_investment|floatformat:2|default:"0.00" }}</h3>
+                        <p>{{ purchased_analyses.count|default:0 }} analyses • {{ active_analyses|default:0 }} active • {{ completed_analyses|default:0 }} completed</p>
+                        <div style="margin-top: 1rem; font-size: 0.875rem; color: var(--binance-green);">
+                            <i class="fas fa-wallet"></i> Wallet Balance: ${{ user_wallet.balance|floatformat:2|default:"0.00" }}
+                        </div>
                     </div>
                 </div>
 
                 <!-- Performance Metrics -->
                 <div class="metrics-grid">
                     <div class="metric-card">
-                        <div class="metric-value" style="color: var(--binance-green);">+${{ total_return|floatformat:2|default:"0.00" }}</div>
-                        <div class="metric-label">Total Returns</div>
+                        <div class="metric-value" style="color: var(--binance-green);">${{ total_investment|floatformat:2|default:"0.00" }}</div>
+                        <div class="metric-label">Total Invested</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value" style="color: var(--binance-green);">+15.3%</div>
-                        <div class="metric-label">ROI</div>
+                        <div class="metric-value" style="color: var(--binance-blue);">{{ purchased_analyses.count|default:0 }}</div>
+                        <div class="metric-label">Total Analyses</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value" style="color: var(--binance-blue);">{{ purchased_analyses|length }}</div>
-                        <div class="metric-label">Active Analyses</div>
+                        <div class="metric-value" style="color: var(--binance-yellow);">{{ average_rating|floatformat:1|default:"0.0" }}/5</div>
+                        <div class="metric-label">Avg Rating</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value" style="color: var(--binance-yellow);">87%</div>
-                        <div class="metric-label">Win Rate</div>
+                        <div class="metric-value" style="color: var(--binance-green);">{{ active_analyses|default:0 }}</div>
+                        <div class="metric-label">Active</div>
                     </div>
                 </div>
             </section>
@@ -814,10 +834,12 @@ html {
                 <div class="section-header">
                     <h2 class="section-title">Your Analyses Portfolio</h2>
                     <div class="section-actions">
-                        <button class="btn btn-secondary">
-                            <i class="fas fa-filter"></i>
-                            Filter
-                        </button>
+                        <select class="form-select" id="analysisFilter">
+                            <option value="all">All Analyses</option>
+                            <option value="active">Active Only</option>
+                            <option value="completed">Completed</option>
+                            <option value="recent">Recent Purchases</option>
+                        </select>
                     </div>
                 </div>
 
@@ -836,11 +858,11 @@ html {
                         </thead>
                         <tbody>
                             {% for purchase in purchased_analyses %}
-                            <tr>
+                            <tr class="analysis-row" data-status="{% if purchase.is_expired %}expired{% else %}active{% endif %}" data-date="{{ purchase.purchased_at|date:'Y-m-d' }}">
                                 <td>
                                     <div class="table-crypto">
-                                        <div class="crypto-icon">
-                                            {{ purchase.analysis.symbol|slice:":3" }}
+                                        <div class="crypto-icon" style="background: linear-gradient(135deg, {% cycle '#F7931A' '#627EEA' '#26A17B' '#F0B90B' '#5C6BC0' %}, {% cycle '#E67E22' '#3F51B5' '#1E8449' '#D4AF37' '#3949AB' %});">
+                                            {{ purchase.analysis.symbol|slice:":3"|upper }}
                                         </div>
                                         <div class="crypto-info">
                                             <h4>{{ purchase.analysis.cryptocurrency }}</h4>
@@ -848,12 +870,12 @@ html {
                                         </div>
                                     </div>
                                 </td>
-                                <td class="table-analyst">{{ purchase.analysis.analyst.analyst_name }}</td>
+                                <td class="table-analyst">{{ purchase.analysis.analyst.analyst_name|default:"Unknown Analyst" }}</td>
                                 <td class="table-price">${{ purchase.purchase_price }}</td>
                                 <td>
                                     <div class="table-rating">
                                         <span class="rating-stars">
-                                            {% with rating=purchase.analysis.rating %}
+                                            {% with rating=purchase.analysis.rating|default:0 %}
                                                 {% for i in "12345" %}
                                                     {% if forloop.counter <= rating %}
                                                         <i class="fas fa-star"></i>
@@ -863,21 +885,28 @@ html {
                                                 {% endfor %}
                                             {% endwith %}
                                         </span>
-                                        <span>{{ purchase.analysis.rating }}/5</span>
+                                        <span>{{ purchase.analysis.rating|default:"0.0" }}/5</span>
                                     </div>
                                 </td>
                                 <td>
+                                    {% if purchase.is_expired %}
+                                    <span class="status-badge status-expired">
+                                        <i class="fas fa-clock"></i>
+                                        Expired
+                                    </span>
+                                    {% else %}
                                     <span class="status-badge status-active">
                                         <i class="fas fa-check-circle"></i>
                                         Active
                                     </span>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <div class="table-actions">
-                                        <button class="btn btn-secondary btn-small view-analysis" data-analysis-id="{{ purchase.analysis.id }}">
+                                        <a href="{% url 'view_analysis' purchase.analysis.id %}" class="btn btn-secondary btn-small">
                                             <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="btn btn-secondary btn-small view-performance" data-analysis-id="{{ purchase.analysis.id }}">
+                                        </a>
+                                        <button class="btn btn-secondary btn-small view-performance" data-analysis-id="{{ purchase.analysis.id }}" data-analysis-name="{{ purchase.analysis.cryptocurrency }}">
                                             <i class="fas fa-chart-line"></i>
                                         </button>
                                     </div>
@@ -909,91 +938,86 @@ html {
             <section class="activity-section">
                 <div class="section-header">
                     <h2 class="section-title">Recent Activity</h2>
-                    <a href="#" class="btn btn-secondary btn-small">
+                    <a href="{% url 'transaction_history' %}" class="btn btn-secondary btn-small">
                         <i class="fas fa-history"></i>
                     </a>
                 </div>
 
-                <div class="activity-list">
-                    <div class="activity-item">
-                        <div class="activity-icon icon-success">
-                            <i class="fas fa-shopping-cart"></i>
+                <div class="activity-list" id="recentActivity">
+                    {% if recent_transactions %}
+                        {% for transaction in recent_transactions|slice:":4" %}
+                        <div class="activity-item">
+                            <div class="activity-icon {% if transaction.transaction_type == 'deposit' %}icon-success{% elif transaction.transaction_type == 'withdrawal' %}icon-warning{% else %}icon-info{% endif %}">
+                                <i class="fas fa-{% if transaction.transaction_type == 'deposit' %}plus{% elif transaction.transaction_type == 'withdrawal' %}minus{% else %}exchange-alt{% endif %}"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">{{ transaction.get_transaction_type_display }}</div>
+                                <div class="activity-description">{{ transaction.description|truncatechars:25 }}</div>
+                            </div>
+                            <div class="activity-time">{{ transaction.created_at|timesince }} ago</div>
                         </div>
-                        <div class="activity-content">
-                            <div class="activity-title">Analysis Purchased</div>
-                            <div class="activity-description">Bitcoin Technical Analysis</div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="activity-item">
+                            <div class="activity-icon icon-info">
+                                <i class="fas fa-info"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">No Recent Activity</div>
+                                <div class="activity-description">Your transactions will appear here</div>
+                            </div>
                         </div>
-                        <div class="activity-time">2h ago</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon icon-info">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">Portfolio Update</div>
-                            <div class="activity-description">+5.2% this week</div>
-                        </div>
-                        <div class="activity-time">1d ago</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon icon-warning">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">Rating Submitted</div>
-                            <div class="activity-description">Ethereum Analysis - 5 stars</div>
-                        </div>
-                        <div class="activity-time">2d ago</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon icon-success">
-                            <i class="fas fa-wallet"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">Deposit Added</div>
-                            <div class="activity-description">+$500 to wallet</div>
-                        </div>
-                        <div class="activity-time">3d ago</div>
-                    </div>
+                    {% endif %}
                 </div>
             </section>
 
-            <!-- Learning Progress -->
+            <!-- Portfolio Summary -->
             <section class="progress-section">
                 <div class="section-header">
-                    <h2 class="section-title">Learning Progress</h2>
+                    <h2 class="section-title">Portfolio Summary</h2>
                 </div>
 
                 <div class="progress-item">
                     <div class="progress-header">
-                        <span class="progress-label">Beginner Level</span>
-                        <span class="progress-value">85%</span>
+                        <span class="progress-label">Analyses Completion</span>
+                        <span class="progress-value">
+                            {% if purchased_analyses %}
+                                {{ completed_analyses|default:0 }}/{{ purchased_analyses.count|default:0 }}
+                            {% else %}
+                                0/0
+                            {% endif %}
+                        </span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill fill-beginner" style="width: 85%;"></div>
+                        <div class="progress-fill fill-beginner" style="width: {{ completion_percentage|default:0 }}%;"></div>
                     </div>
                 </div>
 
                 <div class="progress-item">
                     <div class="progress-header">
-                        <span class="progress-label">Intermediate Level</span>
-                        <span class="progress-value">60%</span>
+                        <span class="progress-label">Investment Diversity</span>
+                        <span class="progress-value">
+                            {% if purchased_analyses %}
+                                {{ unique_cryptos|default:0 }} cryptos
+                            {% else %}
+                                0 cryptos
+                            {% endif %}
+                        </span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill fill-intermediate" style="width: 60%;"></div>
+                        <div class="progress-fill fill-intermediate" style="width: {{ diversity_percentage|default:0 }}%;"></div>
                     </div>
                 </div>
 
                 <div class="progress-item">
                     <div class="progress-header">
-                        <span class="progress-label">Advanced Level</span>
-                        <span class="progress-value">25%</span>
+                        <span class="progress-label">Portfolio Growth</span>
+                        <span class="progress-value">
+                            {% if total_investment > 0 %}+{% endif %}${{ total_investment|floatformat:2|default:"0.00" }}
+                        </span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill fill-advanced" style="width: 25%;"></div>
+                        <div class="progress-fill fill-advanced" style="width: {{ growth_percentage|default:0 }}%;"></div>
                     </div>
                 </div>
             </section>
@@ -1038,6 +1062,15 @@ html {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Portfolio page initialized');
     
+    // Portfolio data
+    const portfolioData = {
+        totalInvestment: {{ total_investment|default:0 }},
+        totalAnalyses: {{ purchased_analyses.count|default:0 }},
+        activeAnalyses: {{ active_analyses|default:0 }},
+        completedAnalyses: {{ completed_analyses|default:0 }},
+        averageRating: {{ average_rating|default:0 }}
+    };
+    
     // Animate progress bars
     const progressBars = document.querySelectorAll('.progress-fill');
     progressBars.forEach(bar => {
@@ -1060,97 +1093,211 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add click handlers for action buttons
-    const viewButtons = document.querySelectorAll('.view-analysis');
-    const performanceButtons = document.querySelectorAll('.view-performance');
-    
-    viewButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const analysisId = this.getAttribute('data-analysis-id');
-            const row = this.closest('tr');
-            const cryptoName = row.querySelector('.crypto-info h4').textContent;
+    // Analysis filtering
+    const analysisFilter = document.getElementById('analysisFilter');
+    if (analysisFilter) {
+        analysisFilter.addEventListener('change', function() {
+            const filterValue = this.value;
+            const rows = document.querySelectorAll('.analysis-row');
             
-            console.log('Viewing analysis:', cryptoName, 'ID:', analysisId);
-            // Implement view analysis logic - redirect to analysis detail page
-            window.location.href = `/analysis/${analysisId}/`;
+            rows.forEach(row => {
+                let showRow = false;
+                
+                switch(filterValue) {
+                    case 'all':
+                        showRow = true;
+                        break;
+                    case 'active':
+                        showRow = row.getAttribute('data-status') === 'active';
+                        break;
+                    case 'completed':
+                        showRow = row.getAttribute('data-status') === 'expired';
+                        break;
+                    case 'recent':
+                        const purchaseDate = new Date(row.getAttribute('data-date'));
+                        const sevenDaysAgo = new Date();
+                        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                        showRow = purchaseDate >= sevenDaysAgo;
+                        break;
+                }
+                
+                row.style.display = showRow ? '' : 'none';
+            });
         });
-    });
+    }
     
-    performanceButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const analysisId = this.getAttribute('data-analysis-id');
-            const row = this.closest('tr');
-            const cryptoName = row.querySelector('.crypto-info h4').textContent;
+    // Time period selector
+    const timePeriod = document.getElementById('timePeriod');
+    if (timePeriod) {
+        timePeriod.addEventListener('change', function() {
+            const days = parseInt(this.value);
+            console.log('Time period changed to:', days, 'days');
             
-            console.log('Viewing performance:', cryptoName, 'ID:', analysisId);
-            // Implement performance view logic - show performance modal
-            showPerformanceModal(analysisId, cryptoName);
+            // Show loading state
+            const chartContainer = document.querySelector('.chart-container');
+            const originalContent = chartContainer.innerHTML;
+            
+            chartContainer.innerHTML = `
+                <div class="placeholder-chart">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h3>Loading Data...</h3>
+                    <p>Updating portfolio metrics for the last ${days} days</p>
+                </div>
+            `;
+            
+            // Simulate data loading
+            setTimeout(() => {
+                updateChartData(days);
+            }, 1000);
         });
-    });
-    
-    // Simulate chart loading
-    const chartContainer = document.querySelector('.chart-container');
-    if (chartContainer) {
-        setTimeout(() => {
-            chartContainer.style.background = 'var(--binance-dark)';
-        }, 1000);
     }
     
     // Export report functionality
-    const exportBtn = document.querySelector('.btn-primary');
-    if (exportBtn && exportBtn.textContent.includes('Export')) {
+    const exportBtn = document.getElementById('exportReport');
+    if (exportBtn) {
         exportBtn.addEventListener('click', function() {
+            const originalHTML = this.innerHTML;
             this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-            this.classList.add('loading');
+            this.disabled = true;
             
+            // Simulate report generation
             setTimeout(() => {
-                this.innerHTML = '<i class="fas fa-download"></i> Export Report';
-                this.classList.remove('loading');
+                this.innerHTML = originalHTML;
+                this.disabled = false;
                 
-                // Simulate download
-                console.log('Portfolio report exported');
+                // Create and download a simple CSV report
+                const csvContent = generateCSVReport();
+                downloadCSV(csvContent, 'portfolio-report.csv');
+                
                 showNotification('Portfolio report downloaded successfully!', 'success');
             }, 2000);
         });
     }
     
-    // Filter functionality
-    const filterBtn = document.querySelector('.btn-secondary');
-    if (filterBtn && filterBtn.textContent.includes('Filter')) {
-        filterBtn.addEventListener('click', function() {
-            console.log('Opening filter options');
-            // Implement filter modal or dropdown
+    // Performance view buttons
+    const performanceButtons = document.querySelectorAll('.view-performance');
+    performanceButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const analysisId = this.getAttribute('data-analysis-id');
+            const analysisName = this.getAttribute('data-analysis-name');
+            
+            showPerformanceModal(analysisId, analysisName);
         });
-    }
-    
-    // Time period selector
-    const timeSelector = document.querySelector('select');
-    if (timeSelector) {
-        timeSelector.addEventListener('change', function() {
-            console.log('Time period changed to:', this.value);
-            // Implement time period filtering
-            updateChartData(this.value);
-        });
-    }
+    });
     
     // Utility functions
-    function showPerformanceModal(analysisId, cryptoName) {
-        // Create a simple alert for now - replace with actual modal
-        alert(`Performance Analysis: ${cryptoName}\n\nThis would show detailed performance metrics and charts for the selected analysis.`);
+    function updateChartData(days) {
+        const chartContainer = document.querySelector('.chart-container');
         
-        // In a real implementation, you would:
-        // 1. Fetch performance data via AJAX
-        // 2. Show a modal with charts and metrics
-        // 3. Display ROI, win rate, and other performance indicators
+        // Update metrics based on time period (simulated)
+        const growthFactor = days === 7 ? 1.02 : days === 30 ? 1.08 : days === 90 ? 1.15 : 1.25;
+        
+        // Update chart display
+        chartContainer.innerHTML = `
+            <div class="placeholder-chart">
+                <i class="fas fa-chart-line"></i>
+                <h3>Portfolio Performance (Last ${days} Days)</h3>
+                <p>Estimated growth: +${Math.round((growthFactor - 1) * 100)}%</p>
+                <div style="margin-top: 1rem; font-size: 0.875rem; color: var(--binance-green);">
+                    <i class="fas fa-chart-bar"></i> ${portfolioData.totalAnalyses} analyses tracked
+                </div>
+            </div>
+        `;
+        
+        showNotification(`Portfolio data updated for last ${days} days`, 'info');
     }
     
-    function updateChartData(timePeriod) {
-        console.log('Updating chart data for:', timePeriod);
-        // Implement chart data update based on time period
-        // This would typically involve:
-        // 1. Fetching new data from the server
-        // 2. Updating the chart visualization
-        // 3. Showing loading state during data fetch
+    function generateCSVReport() {
+        const headers = ['Cryptocurrency', 'Symbol', 'Purchase Price', 'Status', 'Rating'];
+        let csv = headers.join(',') + '\n';
+        
+        const rows = document.querySelectorAll('.analysis-row');
+        rows.forEach(row => {
+            const cryptoName = row.querySelector('.crypto-info h4').textContent;
+            const symbol = row.querySelector('.crypto-info span').textContent;
+            const price = row.querySelector('.table-price').textContent.replace('$', '');
+            const status = row.querySelector('.status-badge').textContent.trim();
+            const rating = row.querySelector('.table-rating span:last-child').textContent;
+            
+            csv += `"${cryptoName}","${symbol}",${price},"${status}","${rating}"\n`;
+        });
+        
+        return csv;
+    }
+    
+    function downloadCSV(content, filename) {
+        const blob = new Blob([content], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+    
+    function showPerformanceModal(analysisId, cryptoName) {
+        // Create modal overlay
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        `;
+        
+        modal.innerHTML = `
+            <div style="background: var(--binance-card); border: 1px solid var(--binance-border); border-radius: 1rem; padding: 2rem; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="color: var(--text-primary); margin: 0;">Performance: ${cryptoName}</h3>
+                    <button class="close-modal" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.5rem;">&times;</button>
+                </div>
+                <div style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    <p>Detailed performance metrics and analytics for ${cryptoName} analysis.</p>
+                    <div style="background: var(--binance-dark); padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <div style="color: var(--text-primary); font-weight: 600;">ROI Estimate</div>
+                                <div style="color: var(--binance-green);">+15.3%</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-primary); font-weight: 600;">Win Rate</div>
+                                <div style="color: var(--binance-green);">87%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn btn-secondary close-modal">Close</button>
+                    <a href="/analysis/${analysisId}/" class="btn btn-primary">View Full Analysis</a>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Close modal handlers
+        const closeButtons = modal.querySelectorAll('.close-modal');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+        });
+        
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
     }
     
     function showNotification(message, type = 'info') {
@@ -1169,10 +1316,15 @@ document.addEventListener('DOMContentLoaded', function() {
             border-radius: 0.5rem;
             padding: 1rem;
             color: var(--text-primary);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         `;
         notification.innerHTML = `
-            <div class="flex items-center justify-between">
-                <span>${message}</span>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}" 
+                       style="color: ${type === 'success' ? 'var(--binance-green)' : type === 'error' ? 'var(--binance-red)' : 'var(--binance-blue)'};"></i>
+                    <span>${message}</span>
+                </div>
                 <button class="close-notification" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; margin-left: 1rem;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -1198,7 +1350,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Add CSS for notifications
+    // Add CSS for animations
     const style = document.createElement('style');
     style.textContent = `
         @keyframes slideInRight {
@@ -1210,18 +1362,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 transform: translateX(0);
                 opacity: 1;
             }
-        }
-        
-        .alert-success {
-            border-color: var(--binance-green);
-        }
-        
-        .alert-info {
-            border-color: var(--binance-blue);
-        }
-        
-        .alert-warning {
-            border-color: var(--binance-yellow);
         }
     `;
     document.head.appendChild(style);

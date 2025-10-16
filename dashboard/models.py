@@ -97,49 +97,50 @@ class UserWallet(models.Model):
         return True
 
 
+# Define transaction choices before Transaction model
+TRANSACTION_TYPES = [
+    ('deposit', 'Deposit'),
+    ('withdrawal', 'Withdrawal'),
+    ('purchase', 'Purchase'),
+    ('refund', 'Refund'),
+    ('commission', 'Commission'),
+]
+
+TRANSACTION_STATUS = [
+    ('pending', 'Pending'),
+    ('completed', 'Completed'),
+    ('failed', 'Failed'),
+    ('cancelled', 'Cancelled'),
+]
+
+
 class Transaction(models.Model):
-    TRANSACTION_TYPES = [
-        ('deposit', 'Deposit'),
-        ('withdrawal', 'Withdrawal'),
-        ('payment', 'Payment'),
-        ('refund', 'Refund'),
-        ('purchase', 'Purchase'),
-        ('consultation', 'Consultation'),
-    ]
-    
-    TRANSACTION_STATUS = [
-        ('pending', 'Pending'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-        ('cancelled', 'Cancelled'),
-    ]
-    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    transaction_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    transaction_type = models.CharField(max_length=15, choices=TRANSACTION_TYPES)
-    payment_method = models.CharField(max_length=10, choices=UserWallet.PAYMENT_METHODS)
-    status = models.CharField(max_length=10, choices=TRANSACTION_STATUS, default='pending')
+    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
+    payment_method = models.CharField(max_length=20, choices=UserWallet.PAYMENT_METHODS)
+    status = models.CharField(max_length=20, choices=TRANSACTION_STATUS, default='pending')
     description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
-    # M-Pesa specific fields
-    mpesa_code = models.CharField(max_length=50, blank=True, null=True)
+    # Add transaction_id field that was referenced in admin
+    transaction_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     
-    # PayPal specific fields
+    # Add these missing fields:
+    reference = models.CharField(max_length=100, blank=True, null=True)  # For M-Pesa reference
+    mpesa_code = models.CharField(max_length=100, blank=True, null=True)  # For M-Pesa transaction code
     paypal_transaction_id = models.CharField(max_length=100, blank=True, null=True)
     
-    # Analysis purchase reference
+    # If you have analysis and consultation foreign keys:
     analysis = models.ForeignKey('CryptoAnalysis', on_delete=models.SET_NULL, null=True, blank=True)
-    
-    # Consultation reference
     consultation = models.ForeignKey('Consultation', on_delete=models.SET_NULL, null=True, blank=True)
     
-    created_at = models.DateTimeField(auto_now_add=True)
+    # Add updated_at field that was referenced in admin
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     def __str__(self):
-        return f"{self.transaction_type} - ${self.amount} - {self.status}"
-
+        return f"{self.user.username} - {self.transaction_type} - ${self.amount}"
+    
     class Meta:
         ordering = ['-created_at']
 
@@ -170,143 +171,6 @@ class Analyst(models.Model):
         if self.user.first_name and self.user.last_name:
             return f"{self.user.first_name[0]}{self.user.last_name[0]}".upper()
         return self.user.username[:2].upper()
-
-
-class MarketInsight(models.Model):
-    """Model for market insights and trends"""
-    INSIGHT_TYPES = [
-        ('market_trend', 'Market Trend'),
-        ('price_analysis', 'Price Analysis'),
-        ('regulatory', 'Regulatory Update'),
-        ('technology', 'Technology Update'),
-        ('adoption', 'Adoption News'),
-        ('security', 'Security Alert'),
-    ]
-    
-    URGENCY_LEVELS = [
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
-        ('critical', 'Critical'),
-    ]
-    
-    # Basic Information
-    title = models.CharField(max_length=200)
-    insight_type = models.CharField(max_length=20, choices=INSIGHT_TYPES, default='market_trend')
-    cryptocurrency = models.CharField(max_length=100, blank=True, null=True)
-    symbol = models.CharField(max_length=10, blank=True, null=True)
-    
-    # Content
-    summary = models.TextField(help_text="Brief summary of the insight")
-    full_content = models.TextField(help_text="Detailed insight content")
-    key_takeaways = models.TextField(help_text="Key points from the insight", blank=True)
-    
-    # Impact and Urgency
-    impact_level = models.CharField(max_length=10, choices=URGENCY_LEVELS, default='medium')
-    urgency = models.CharField(max_length=10, choices=URGENCY_LEVELS, default='medium')
-    potential_impact = models.TextField(help_text="Potential market impact", blank=True)
-    
-    # Source and Verification
-    source = models.CharField(max_length=200, blank=True, null=True)
-    source_url = models.URLField(blank=True, null=True)
-    is_verified = models.BooleanField(default=False)
-    verified_by = models.ForeignKey(Analyst, on_delete=models.SET_NULL, null=True, blank=True)
-    
-    # Metadata
-    views_count = models.IntegerField(default=0)
-    is_featured = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    
-    # Timestamps
-    published_at = models.DateTimeField(default=timezone.now)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return f"{self.title} - {self.get_insight_type_display()}"
-    
-    @property
-    def is_recent(self):
-        """Check if insight was published in the last 24 hours"""
-        return self.published_at > timezone.now() - timedelta(hours=24)
-    
-    @property
-    def urgency_color(self):
-        """Get color for urgency level"""
-        colors = {
-            'low': 'green',
-            'medium': 'orange',
-            'high': 'red',
-            'critical': 'darkred'
-        }
-        return colors.get(self.urgency, 'gray')
-    
-    @property
-    def impact_color(self):
-        """Get color for impact level"""
-        colors = {
-            'low': 'blue',
-            'medium': 'orange',
-            'high': 'red',
-            'critical': 'darkred'
-        }
-        return colors.get(self.impact_level, 'gray')
-    
-    class Meta:
-        ordering = ['-published_at', '-created_at']
-        verbose_name = 'Market Insight'
-        verbose_name_plural = 'Market Insights'
-
-
-class ChartAnnotation(models.Model):
-    """Model for chart annotations and markers"""
-    ANALYSIS_TYPES = [
-        ('support', 'Support Level'),
-        ('resistance', 'Resistance Level'),
-        ('entry', 'Entry Point'),
-        ('exit', 'Exit Point'),
-        ('trend', 'Trend Line'),
-        ('pattern', 'Chart Pattern'),
-        ('target', 'Price Target'),
-        ('stop_loss', 'Stop Loss'),
-    ]
-    
-    analysis = models.ForeignKey('CryptoAnalysis', on_delete=models.CASCADE, related_name='chart_annotations')
-    type = models.CharField(max_length=20, choices=ANALYSIS_TYPES)
-    price_level = models.DecimalField(max_digits=12, decimal_places=4, null=True, blank=True)
-    timestamp = models.DateTimeField(null=True, blank=True)
-    description = models.TextField(blank=True)
-    color = models.CharField(max_length=7, default='#f0b90b')  # Hex color
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"{self.type} - {self.analysis.cryptocurrency}"
-    
-    class Meta:
-        ordering = ['price_level']
-
-
-class TechnicalIndicatorData(models.Model):
-    """Model for technical indicators data"""
-    INDICATOR_TYPES = [
-        ('sma', 'Simple Moving Average'),
-        ('ema', 'Exponential Moving Average'),
-        ('rsi', 'Relative Strength Index'),
-        ('macd', 'Moving Average Convergence Divergence'),
-        ('bollinger', 'Bollinger Bands'),
-        ('stochastic', 'Stochastic Oscillator'),
-        ('volume', 'Volume'),
-    ]
-    
-    analysis = models.ForeignKey('CryptoAnalysis', on_delete=models.CASCADE, related_name='indicator_data')
-    indicator_type = models.CharField(max_length=20, choices=INDICATOR_TYPES)
-    data = models.JSONField(default=dict, help_text="Indicator data points")
-    parameters = models.JSONField(default=dict, help_text="Indicator parameters (periods, etc.)")
-    color = models.CharField(max_length=7, default='#03a66d')  # Hex color
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"{self.get_indicator_type_display()} - {self.analysis.cryptocurrency}"
 
 
 class CryptoAnalysis(models.Model):
@@ -367,9 +231,10 @@ class CryptoAnalysis(models.Model):
     resistance_levels = models.JSONField(default=list, blank=True, null=True)
     
     # Pricing
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     is_featured = models.BooleanField(default=False)
     discount_percentage = models.IntegerField(default=0)
+    total_revenue = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
     
     # Content
     description = models.TextField()
@@ -488,6 +353,143 @@ class CryptoAnalysis(models.Model):
     class Meta:
         verbose_name_plural = "Crypto Analyses"
         ordering = ['-created_at']
+
+
+class MarketInsight(models.Model):
+    """Model for market insights and trends"""
+    INSIGHT_TYPES = [
+        ('market_trend', 'Market Trend'),
+        ('price_analysis', 'Price Analysis'),
+        ('regulatory', 'Regulatory Update'),
+        ('technology', 'Technology Update'),
+        ('adoption', 'Adoption News'),
+        ('security', 'Security Alert'),
+    ]
+    
+    URGENCY_LEVELS = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('critical', 'Critical'),
+    ]
+    
+    # Basic Information
+    title = models.CharField(max_length=200)
+    insight_type = models.CharField(max_length=20, choices=INSIGHT_TYPES, default='market_trend')
+    cryptocurrency = models.CharField(max_length=100, blank=True, null=True)
+    symbol = models.CharField(max_length=10, blank=True, null=True)
+    
+    # Content
+    summary = models.TextField(help_text="Brief summary of the insight")
+    full_content = models.TextField(help_text="Detailed insight content")
+    key_takeaways = models.TextField(help_text="Key points from the insight", blank=True)
+    
+    # Impact and Urgency
+    impact_level = models.CharField(max_length=10, choices=URGENCY_LEVELS, default='medium')
+    urgency = models.CharField(max_length=10, choices=URGENCY_LEVELS, default='medium')
+    potential_impact = models.TextField(help_text="Potential market impact", blank=True)
+    
+    # Source and Verification
+    source = models.CharField(max_length=200, blank=True, null=True)
+    source_url = models.URLField(blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
+    verified_by = models.ForeignKey(Analyst, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # Metadata
+    views_count = models.IntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    
+    # Timestamps
+    published_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.title} - {self.get_insight_type_display()}"
+    
+    @property
+    def is_recent(self):
+        """Check if insight was published in the last 24 hours"""
+        return self.published_at > timezone.now() - timedelta(hours=24)
+    
+    @property
+    def urgency_color(self):
+        """Get color for urgency level"""
+        colors = {
+            'low': 'green',
+            'medium': 'orange',
+            'high': 'red',
+            'critical': 'darkred'
+        }
+        return colors.get(self.urgency, 'gray')
+    
+    @property
+    def impact_color(self):
+        """Get color for impact level"""
+        colors = {
+            'low': 'blue',
+            'medium': 'orange',
+            'high': 'red',
+            'critical': 'darkred'
+        }
+        return colors.get(self.impact_level, 'gray')
+    
+    class Meta:
+        ordering = ['-published_at', '-created_at']
+        verbose_name = 'Market Insight'
+        verbose_name_plural = 'Market Insights'
+
+
+class ChartAnnotation(models.Model):
+    """Model for chart annotations and markers"""
+    ANALYSIS_TYPES = [
+        ('support', 'Support Level'),
+        ('resistance', 'Resistance Level'),
+        ('entry', 'Entry Point'),
+        ('exit', 'Exit Point'),
+        ('trend', 'Trend Line'),
+        ('pattern', 'Chart Pattern'),
+        ('target', 'Price Target'),
+        ('stop_loss', 'Stop Loss'),
+    ]
+    
+    analysis = models.ForeignKey(CryptoAnalysis, on_delete=models.CASCADE, related_name='chart_annotations')
+    type = models.CharField(max_length=20, choices=ANALYSIS_TYPES)
+    price_level = models.DecimalField(max_digits=12, decimal_places=4, null=True, blank=True)
+    timestamp = models.DateTimeField(null=True, blank=True)
+    description = models.TextField(blank=True)
+    color = models.CharField(max_length=7, default='#f0b90b')  # Hex color
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.type} - {self.analysis.cryptocurrency}"
+    
+    class Meta:
+        ordering = ['price_level']
+
+
+class TechnicalIndicatorData(models.Model):
+    """Model for technical indicators data"""
+    INDICATOR_TYPES = [
+        ('sma', 'Simple Moving Average'),
+        ('ema', 'Exponential Moving Average'),
+        ('rsi', 'Relative Strength Index'),
+        ('macd', 'Moving Average Convergence Divergence'),
+        ('bollinger', 'Bollinger Bands'),
+        ('stochastic', 'Stochastic Oscillator'),
+        ('volume', 'Volume'),
+    ]
+    
+    analysis = models.ForeignKey(CryptoAnalysis, on_delete=models.CASCADE, related_name='indicator_data')
+    indicator_type = models.CharField(max_length=20, choices=INDICATOR_TYPES)
+    data = models.JSONField(default=dict, help_text="Indicator data points")
+    parameters = models.JSONField(default=dict, help_text="Indicator parameters (periods, etc.)")
+    color = models.CharField(max_length=7, default='#03a66d')  # Hex color
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.get_indicator_type_display()} - {self.analysis.cryptocurrency}"
 
 
 class AnalysisInsight(models.Model):
@@ -665,7 +667,7 @@ class Consultation(models.Model):
     title = models.CharField(max_length=200)
     level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')
     description = models.TextField(blank=True, null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     duration_minutes = models.IntegerField(default=60)
     scheduled_date = models.DateTimeField()
     
@@ -750,14 +752,16 @@ class Consultation(models.Model):
         elif self.status == 'cancelled':
             return 'Cancelled'
         elif self.is_upcoming:
-            if self.time_until_session.days > 0:
+            if self.time_until_session and self.time_until_session.days > 0:
                 return f"In {self.time_until_session.days} days"
-            elif self.time_until_session.seconds > 3600:
+            elif self.time_until_session and self.time_until_session.seconds > 3600:
                 hours = self.time_until_session.seconds // 3600
                 return f"In {hours} hours"
-            else:
+            elif self.time_until_session:
                 minutes = self.time_until_session.seconds // 60
                 return f"In {minutes} minutes"
+            else:
+                return 'Scheduled'
         else:
             return 'Scheduled'
     
@@ -922,3 +926,36 @@ def create_consultation_reminders(sender, instance, created, **kwargs):
             reminder_type='email',
             scheduled_time=instance.scheduled_date - timedelta(hours=1)
         )
+
+
+class MpesaTransaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('deposit', 'Deposit'),
+        ('withdrawal', 'Withdrawal'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('successful', 'Successful'),
+        ('failed', 'Failed'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    phone_number = models.CharField(max_length=15)
+    checkout_request_id = models.CharField(max_length=100, blank=True, null=True)
+    merchant_request_id = models.CharField(max_length=100, blank=True, null=True)
+    result_code = models.IntegerField(blank=True, null=True)
+    result_desc = models.TextField(blank=True, null=True)
+    mpesa_receipt_number = models.CharField(max_length=50, blank=True, null=True)
+    transaction_date = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    def __str__(self):
+        return f"{self.transaction_type} - {self.amount} - {self.status}"
+    
+
+
+

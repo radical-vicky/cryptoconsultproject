@@ -653,6 +653,13 @@
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
+
+        .level-expert {
+            background: rgba(76, 6, 167, 0.2);
+            color: #44ef8b;
+            border: 1px solid rgba(13, 1, 28, 0.3);
+        }
+
         .consultation-icon {
             width: 60px;
             height: 60px;
@@ -674,6 +681,10 @@
 
         .icon-advanced {
             background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+         .icon-expert {
+            background: linear-gradient(135deg, #5e059e, #dc2626);
         }
 
         .consultation-title {
@@ -733,8 +744,8 @@
         }
 
         .balance-insufficient {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(1, 105, 53, 0.1);
+            border-color: rgba(72, 113, 6, 0.3);
         }
 
         .balance-info {
@@ -758,7 +769,7 @@
         }
 
         .balance-insufficient .balance-amount {
-            color: #ef4444;
+            color: #44ef9c;
         }
 
         /* Section Header Styles */
@@ -1152,7 +1163,7 @@
     {% if user.is_authenticated %}
         <!-- Additional authenticated-only links -->
         <a href="{% url 'purchase_analysis' %}" class="nav-link {% if request.resolver_match.url_name == 'purchase_analysis' %}active{% endif %}">
-            <i class="fas fa-analytics"></i> My Analyses
+            <i class="fas fa-chart-line"></i> My Analyses
         </a>
         <a href="{% url 'my_consultations' %}" class="nav-link {% if request.resolver_match.url_name == 'my_consultations' %}active{% endif %}">
             <i class="fas fa-calendar-check"></i> My Consultations
@@ -1177,7 +1188,7 @@
                     <i class="fas fa-book"></i> Market Insights
                 </a>
                 <a href="{% url 'purchase_analysis' %}" class="user-menu-item">
-                    <i class="fas fa-book"></i> My Analyses
+                    <i class="fas fa-chart-line"></i> My Analyses
                 </a>
                 <a href="{% url 'marketplace' %}" class="user-menu-item">
                     <i class="fas fa-store"></i> Marketplace
@@ -1238,12 +1249,12 @@
     <nav class="mobile-nav">
         {% if user.is_authenticated %}
             <!-- Authenticated Mobile Navigation -->
-            <a href="{% url 'dashboard' %}" class="mobile-nav-link">📊 Dashboard</a>
-            <a href="{% url 'portfolio' %}" class="mobile-nav-link">📈 Portfolio</a>
+            <a href="{% url 'dashboard' %}" class="mobile-nav-link"> Dashboard</a>
+            <a href="{% url 'portfolio' %}" class="mobile-nav-link"> Portfolio</a>
         {% else %}
             <!-- Guest Mobile Navigation -->
             <a href="#features" class="mobile-nav-link">⭐ Features</a>
-            <a href="#pricing" class="mobile-nav-link">💰 Pricing</a>
+            <a href="#pricing" class="mobile-nav-link"> Pricing</a>
             <a href="#testimonials" class="mobile-nav-link">🌟 Success Stories</a>
         {% endif %}
         
@@ -1252,16 +1263,16 @@
         
         {% if user.is_authenticated %}
             <!-- Additional authenticated-only mobile links -->
-            <a href="{% url 'purchase_analysis' %}" class="mobile-nav-link">📊 My Analyses</a>
-            <a href="{% url 'wallet' %}" class="mobile-nav-link">💰 Wallet</a>
-            <a href="{% url 'profile' %}" class="mobile-nav-link">👤 Profile</a>
+            <a href="{% url 'purchase_analysis' %}" class="mobile-nav-link">My Analyses</a>
+            <a href="{% url 'wallet' %}" class="mobile-nav-link"> Wallet</a>
+            <a href="{% url 'profile' %}" class="mobile-nav-link">Profile</a>
             <div style="border-top: 1px solid var(--binance-border); margin: 1rem 0;"></div>
             {% if user_wallet %}
             <div class="mobile-nav-link" style="color: var(--binance-yellow);">
-                💰 Balance: ${{ user_wallet.balance|default:"0.00" }}
+                Balance: ${{ user_wallet.balance|default:"0.00" }}
             </div>
             {% endif %}
-            <a href="{% url 'account_logout' %}" class="mobile-nav-link" style="color: var(--danger-color);">🚪 Logout</a>
+            <a href="{% url 'account_logout' %}" class="mobile-nav-link" style="color: var(--danger-color);">Logout</a>
         {% else %}
             <div class="mt-8 space-y-3">
                 <a href="{% url 'account_login' %}" class="btn btn-outline block text-center">Sign In</a>
@@ -1310,8 +1321,8 @@
             
             <!-- Hero Content -->
             <div class="hero-content">
-                <h1 class="text-5xl font-bold mb-6">
-                    Trade Smarter with <span class="gradient-text">Pre-Analyzed Crypto</span>
+                <h1 class="text-4xl font-bold mb-6">
+                    Trade Smarter with <span class="gradient-text">Pre-Analyzed Crypto & Affordable Consultations</span>
                 </h1>
                 <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
                     Get access to professionally analyzed cryptocurrency insights. Our expert team does the research so you can make informed trading decisions with confidence.
@@ -1319,7 +1330,7 @@
                 <div class="space-x-4">
                     {% if user.is_authenticated %}
                         <a href="{% url 'marketplace' %}" class="btn btn-primary btn-large">
-                            <i class="fas fa-store"></i> Browse Analyses
+                            <i class="fas fa-store"></i> Browse Marketplace
                         </a>
                         <a href="{% url 'dashboard' %}" class="btn btn-outline btn-large">
                             <i class="fas fa-tachometer-alt"></i> Go to Dashboard
@@ -1533,14 +1544,14 @@
                                            style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.5rem; color: #ffffff;">
                                 </div>
                                 <button type="submit" 
-                                        class="btn {% if user_wallet.balance >= package.price %}btn-primary{% else %}btn-outline{% endif %}" 
+                                        class="btn {% if user_wallet.balance >= package.price %}btn-primary{% else %}btn-primary{% endif %}" 
                                         style="width: 100%; padding: 0.75rem; border: none; border-radius: 0.5rem; font-weight: 600; cursor: {% if user_wallet.balance >= package.price %}pointer{% else %}not-allowed{% endif %};"
                                         {% if user_wallet.balance < package.price %}disabled{% endif %}>
-                                    <i class="fas fa-{% if user_wallet.balance >= package.price %}calendar-check{% else %}exclamation-triangle{% endif %}"></i>
+                                    <i class="fas fa-{% if user_wallet.balance >= package.price %}calendar-check{% else %}{% endif %}"></i>
                                     {% if user_wallet.balance >= package.price %}
                                         Book {{ package.get_level_display }} Session
                                     {% else %}
-                                        Insufficient Balance
+                                        Get Trade Consultation Now
                                     {% endif %}
                                 </button>
                                 {% if user_wallet.balance < package.price %}
@@ -1894,6 +1905,7 @@
     </script>
 
     {% block extra_scripts %}
+    
     <!-- Additional scripts can be added by child templates -->
     {% endblock %}
 </body>

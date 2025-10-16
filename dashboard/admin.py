@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.utils.html import format_html
 from django.db.models import Count, Sum, Avg
 from .models import (
-    UserProfile, UserWallet, Transaction, 
+    UserProfile, UserWallet, Transaction, MpesaTransaction,
     Analyst, CryptoAnalysis, PurchasedAnalysis, 
     AnalysisRating, Category, Consultation, ConsultationPackage,
     SiteSetting, MarketInsight, ChartAnnotation, TechnicalIndicatorData,
@@ -100,6 +100,61 @@ class TransactionAdmin(admin.ModelAdmin):
             color, obj.get_status_display()
         )
     status_badge.short_description = 'Status'
+
+@admin.register(MpesaTransaction)
+class MpesaTransactionAdmin(admin.ModelAdmin):
+    list_display = [
+        'user', 'transaction_type_badge', 'amount_display', 'phone_number', 
+        'status_badge', 'mpesa_receipt_number_short', 'transaction_date', 'created_at'
+    ]
+    list_filter = ['transaction_type', 'status', 'created_at', 'transaction_date']
+    search_fields = [
+        'user__username', 'phone_number', 'mpesa_receipt_number', 
+        'checkout_request_id', 'merchant_request_id'
+    ]
+    readonly_fields = ['created_at']
+    list_per_page = 25
+    
+    def transaction_type_badge(self, obj):
+        colors = {
+            'deposit': 'green',
+            'withdrawal': 'blue'
+        }
+        color = colors.get(obj.transaction_type, 'gray')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">{}</span>',
+            color, obj.get_transaction_type_display()
+        )
+    transaction_type_badge.short_description = 'Type'
+    
+    def amount_display(self, obj):
+        return f"KSh {obj.amount:,.2f}"
+    amount_display.short_description = 'Amount'
+    
+    def status_badge(self, obj):
+        colors = {
+            'pending': 'orange',
+            'successful': 'green',
+            'failed': 'red'
+        }
+        color = colors.get(obj.status, 'blue')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">{}</span>',
+            color, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
+    
+    def mpesa_receipt_number_short(self, obj):
+        if obj.mpesa_receipt_number:
+            return obj.mpesa_receipt_number[:8] + "..."
+        return "Pending"
+    mpesa_receipt_number_short.short_description = 'Receipt No'
+    
+    def result_info(self, obj):
+        if obj.result_code and obj.result_desc:
+            return f"{obj.result_code}: {obj.result_desc}"
+        return "No result info"
+    result_info.short_description = 'Result'
 
 @admin.register(Analyst)
 class AnalystAdmin(admin.ModelAdmin):
