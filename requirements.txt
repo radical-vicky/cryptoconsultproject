@@ -6,5 +6,5 @@ Pillow
 requests
 python-dotenv
 gunicorn==21.2.0
-whitenoise
-# Add any other packages you're using
+psycopg2-binary==2.9.10
+whitenoise==6.8.2
