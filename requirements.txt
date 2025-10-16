@@ -1,0 +1,8 @@
+Django>=4.2,<5.0
+django-allauth
+django-crispy-forms
+crispy-bootstrap5
+Pillow
+requests
+python-dotenv
+# Add any other packages you're using
