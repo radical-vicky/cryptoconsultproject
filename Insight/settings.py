@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,17 +22,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*zad5lzp8u4kclb2wi!k7++mlqv3-p+7t^l(2xhx!j=u#71tg9'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-*zad5lzp8u4kclb2wi!k7++mlqv3-p+7t^l(2xhx!j=u#71tg9')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
- ALLOWED_HOSTS = [
-        '.railway.app',
-        '.up.railway.app',
-        'localhost',
-        '127.0.0.1',
-    ]
+ALLOWED_HOSTS = [
+    'cryptoconsultproject-production.up.railway.app',
+    '.railway.app',
+    '.up.railway.app',
+    'localhost',
+    '127.0.0.1',
+]
+
+# Add CSRF trusted origins for Railway
+CSRF_TRUSTED_ORIGINS = [
+    'https://cryptoconsultproject-production.up.railway.app',
+    'https://*.railway.app',
+    'https://*.up.railway.app',
+]
 
 
 # Application definition
@@ -62,13 +72,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.twitter',
 ]
+
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -102,26 +112,22 @@ WSGI_APPLICATION = 'Insight.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Use PostgreSQL on Railway, SQLite locally
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True
+        )
     }
-}
-
-
-#DATABASES = {
-    #'default': {
-        #'ENGINE': 'django.db.backends.postgresql',
-        #'NAME': 'insight_db',  # Your database name
-        #'USER': 'root',     # Your PostgreSQL username
-       #'PASSWORD': '', # Your PostgreSQL password
-       #'HOST': 'localhost',    # Your database host
-        #'PORT': '5432',         # Your database port
-   # }
-#}
-
-
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -158,7 +164,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
     BASE_DIR / 'static' / 'css',
@@ -166,6 +172,9 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static' / 'images',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise configuration for static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -184,14 +193,25 @@ SITE_ID = 1
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Allauth Settings
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/accounts/profile/'
 
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
 
 # PayPal Settings
 #PAYPAL_CLIENT_ID='Ae1YHRsPVvb1QZzRP8Et7XYU5PwUrcbwCIklWOR6d1oOzIKiVy1v5FF2HH_17w8xAqn6KNpVrsGd1pUN'
@@ -199,13 +219,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #SPAYPAL_MODE='sandbox'  # or live
 
 # M-Pesa Settings
-MPESA_CONSUMER_KEY='LQost6BhC09UpLKaYjbRunq3IZN1ylfzHzI8tz47jxlaVHvI'
-MPESA_CONSUMER_SECRET="Kn2l7P0mCnFAJAi7KdOMsIRkpAsH698PBLbhG5EqVRc7CY27pv6d0U96hEhmByo6"
-MPESA_SHORTCODE='174379'
-MPESA_SHORTCODE_TYPE='paybill'  # or till
-MPESA_PASSKEY='bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
-MPESA_CALLBACK_URL='http://darajambili.herokuapp.com/callback'
-MPESA_ENVIRONMENT='sandbox'  # or live
-MPESA_INITIATOR_NAME='testapi'
-MPESA_INITIATOR_PASSWORD='Safaricom2018'
-
+MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY', 'LQost6BhC09UpLKaYjbRunq3IZN1ylfzHzI8tz47jxlaVHvI')
+MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET', 'Kn2l7P0mCnFAJAi7KdOMsIRkpAsH698PBLbhG5EqVRc7CY27pv6d0U96hEhmByo6')
+MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '174379')
+MPESA_SHORTCODE_TYPE = os.environ.get('MPESA_SHORTCODE_TYPE', 'paybill')  # or till
+MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY', 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919')
+MPESA_CALLBACK_URL = os.environ.get('MPESA_CALLBACK_URL', 'http://darajambili.herokuapp.com/callback')
+MPESA_ENVIRONMENT = os.environ.get('MPESA_ENVIRONMENT', 'sandbox')  # or live
+MPESA_INITIATOR_NAME = os.environ.get('MPESA_INITIATOR_NAME', 'testapi')
+MPESA_INITIATOR_PASSWORD = os.environ.get('MPESA_INITIATOR_PASSWORD', 'Safaricom2018')
